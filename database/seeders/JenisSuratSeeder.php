@@ -1,0 +1,196 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\JenisSurat;
+use Illuminate\Database\Seeder;
+
+class JenisSuratSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $jenisSurat = [
+            [
+                'kode' => 'SKD',
+                'nama' => 'Surat Keterangan Domisili',
+                'deskripsi' => 'Surat keterangan tempat tinggal/domisili',
+                'estimasi_hari' => 2,
+                'biaya' => 0,
+                'persyaratan' => json_encode([
+                    ['field' => 'alamat_sekarang', 'label' => 'Alamat Sekarang', 'type' => 'text', 'required' => true],
+                    ['field' => 'alamat_asal', 'label' => 'Alamat Asal', 'type' => 'text', 'required' => true],
+                    ['field' => 'tujuan', 'label' => 'Tujuan Pembuatan', 'type' => 'text', 'required' => true],
+                    ['field' => 'ktp', 'label' => 'Foto KTP', 'type' => 'file', 'required' => true],
+                    ['field' => 'kk', 'label' => 'Foto Kartu Keluarga', 'type' => 'file', 'required' => true],
+                ]),
+                'template' => 'domisili',
+                'is_active' => true,
+            ],
+            [
+                'kode' => 'SKTM',
+                'nama' => 'Surat Keterangan Tidak Mampu',
+                'deskripsi' => 'Surat keterangan tidak mampu untuk keperluan sosial',
+                'estimasi_hari' => 3,
+                'biaya' => 0,
+                'persyaratan' => json_encode([
+                    ['field' => 'tujuan', 'label' => 'Tujuan Pembuatan', 'type' => 'text', 'required' => true],
+                    ['field' => 'penghasilan', 'label' => 'Penghasilan Per Bulan', 'type' => 'text', 'required' => true],
+                    ['field' => 'jumlah_tanggungan', 'label' => 'Jumlah Tanggungan', 'type' => 'number', 'required' => true],
+                    ['field' => 'ktp', 'label' => 'Foto KTP', 'type' => 'file', 'required' => true],
+                    ['field' => 'kk', 'label' => 'Foto Kartu Keluarga', 'type' => 'file', 'required' => true],
+                    ['field' => 'surat_rt', 'label' => 'Surat Keterangan RT', 'type' => 'file', 'required' => true],
+                ]),
+                'template' => 'sktm',
+                'is_active' => true,
+            ],
+            [
+                'kode' => 'SKU',
+                'nama' => 'Surat Keterangan Usaha',
+                'deskripsi' => 'Surat keterangan usaha untuk keperluan bisnis',
+                'estimasi_hari' => 3,
+                'biaya' => 25000,
+                'persyaratan' => json_encode([
+                    ['field' => 'nama_usaha', 'label' => 'Nama Usaha', 'type' => 'text', 'required' => true],
+                    ['field' => 'alamat_usaha', 'label' => 'Alamat Usaha', 'type' => 'text', 'required' => true],
+                    ['field' => 'jenis_usaha', 'label' => 'Jenis Usaha', 'type' => 'text', 'required' => true],
+                    ['field' => 'tujuan', 'label' => 'Tujuan Pembuatan', 'type' => 'text', 'required' => true],
+                    ['field' => 'ktp', 'label' => 'Foto KTP', 'type' => 'file', 'required' => true],
+                    ['field' => 'foto_usaha', 'label' => 'Foto Tempat Usaha', 'type' => 'file', 'required' => true],
+                ]),
+                'template' => 'usaha',
+                'is_active' => true,
+            ],
+            [
+                'kode' => 'SKK',
+                'nama' => 'Surat Keterangan Kelahiran',
+                'deskripsi' => 'Surat keterangan kelahiran anak',
+                'estimasi_hari' => 2,
+                'biaya' => 15000,
+                'persyaratan' => json_encode([
+                    ['field' => 'nama_bayi', 'label' => 'Nama Bayi', 'type' => 'text', 'required' => true],
+                    ['field' => 'tanggal_lahir', 'label' => 'Tanggal Lahir', 'type' => 'date', 'required' => true],
+                    ['field' => 'tempat_lahir', 'label' => 'Tempat Lahir', 'type' => 'text', 'required' => true],
+                    ['field' => 'nama_ayah', 'label' => 'Nama Ayah', 'type' => 'text', 'required' => true],
+                    ['field' => 'nama_ibu', 'label' => 'Nama Ibu', 'type' => 'text', 'required' => true],
+                    ['field' => 'ktp_ortu', 'label' => 'Foto KTP Orang Tua', 'type' => 'file', 'required' => true],
+                    ['field' => 'kk', 'label' => 'Foto Kartu Keluarga', 'type' => 'file', 'required' => true],
+                    ['field' => 'surat_rs', 'label' => 'Surat Keterangan dari Rumah Sakit', 'type' => 'file', 'required' => true],
+                ]),
+                'template' => 'kelahiran',
+                'is_active' => true,
+            ],
+            [
+                'kode' => 'SKM',
+                'nama' => 'Surat Keterangan Kematian',
+                'deskripsi' => 'Surat keterangan kematian',
+                'estimasi_hari' => 2,
+                'biaya' => 0,
+                'persyaratan' => json_encode([
+                    ['field' => 'nama_alm', 'label' => 'Nama Almarhum/Almarhumah', 'type' => 'text', 'required' => true],
+                    ['field' => 'tanggal_meninggal', 'label' => 'Tanggal Meninggal', 'type' => 'date', 'required' => true],
+                    ['field' => 'tempat_meninggal', 'label' => 'Tempat Meninggal', 'type' => 'text', 'required' => true],
+                    ['field' => 'sebab_meninggal', 'label' => 'Sebab Meninggal', 'type' => 'text', 'required' => true],
+                    ['field' => 'ktp_alm', 'label' => 'Foto KTP Almarhum/Almarhumah', 'type' => 'file', 'required' => true],
+                    ['field' => 'kk', 'label' => 'Foto Kartu Keluarga', 'type' => 'file', 'required' => true],
+                    ['field' => 'surat_rs', 'label' => 'Surat Keterangan dari Rumah Sakit/Dokter', 'type' => 'file', 'required' => true],
+                ]),
+                'template' => 'kematian',
+                'is_active' => true,
+            ],
+            [
+                'kode' => 'SPN',
+                'nama' => 'Surat Pengantar Nikah',
+                'deskripsi' => 'Surat pengantar untuk keperluan nikah',
+                'estimasi_hari' => 3,
+                'biaya' => 30000,
+                'persyaratan' => json_encode([
+                    ['field' => 'nama_calon_suami', 'label' => 'Nama Calon Suami', 'type' => 'text', 'required' => true],
+                    ['field' => 'nama_calon_istri', 'label' => 'Nama Calon Istri', 'type' => 'text', 'required' => true],
+                    ['field' => 'alamat_calon_suami', 'label' => 'Alamat Calon Suami', 'type' => 'text', 'required' => true],
+                    ['field' => 'alamat_calon_istri', 'label' => 'Alamat Calon Istri', 'type' => 'text', 'required' => true],
+                    ['field' => 'ktp_calon_suami', 'label' => 'Foto KTP Calon Suami', 'type' => 'file', 'required' => true],
+                    ['field' => 'ktp_calon_istri', 'label' => 'Foto KTP Calon Istri', 'type' => 'file', 'required' => true],
+                    ['field' => 'kk_calon_suami', 'label' => 'Foto KK Calon Suami', 'type' => 'file', 'required' => true],
+                    ['field' => 'kk_calon_istri', 'label' => 'Foto KK Calon Istri', 'type' => 'file', 'required' => true],
+                ]),
+                'template' => 'nikah',
+                'is_active' => true,
+            ],
+            [
+                'kode' => 'SKP',
+                'nama' => 'Surat Keterangan Penghasilan',
+                'deskripsi' => 'Surat keterangan penghasilan untuk berbagai keperluan',
+                'estimasi_hari' => 2,
+                'biaya' => 20000,
+                'persyaratan' => json_encode([
+                    ['field' => 'tujuan', 'label' => 'Tujuan Pembuatan', 'type' => 'text', 'required' => true],
+                    ['field' => 'penghasilan', 'label' => 'Penghasilan Per Bulan', 'type' => 'text', 'required' => true],
+                    ['field' => 'pekerjaan', 'label' => 'Pekerjaan', 'type' => 'text', 'required' => true],
+                    ['field' => 'nama_perusahaan', 'label' => 'Nama Perusahaan/Tempat Kerja', 'type' => 'text', 'required' => true],
+                    ['field' => 'ktp', 'label' => 'Foto KTP', 'type' => 'file', 'required' => true],
+                    ['field' => 'kk', 'label' => 'Foto Kartu Keluarga', 'type' => 'file', 'required' => true],
+                ]),
+                'template' => 'penghasilan',
+                'is_active' => true,
+            ],
+            [
+                'kode' => 'SKB',
+                'nama' => 'Surat Keterangan Belum Menikah',
+                'deskripsi' => 'Surat keterangan belum menikah',
+                'estimasi_hari' => 2,
+                'biaya' => 15000,
+                'persyaratan' => json_encode([
+                    ['field' => 'tujuan', 'label' => 'Tujuan Pembuatan', 'type' => 'text', 'required' => true],
+                    ['field' => 'ktp', 'label' => 'Foto KTP', 'type' => 'file', 'required' => true],
+                    ['field' => 'kk', 'label' => 'Foto Kartu Keluarga', 'type' => 'file', 'required' => true],
+                    ['field' => 'surat_rt', 'label' => 'Surat Keterangan RT', 'type' => 'file', 'required' => true],
+                ]),
+                'template' => 'belum_menikah',
+                'is_active' => true,
+            ],
+            [
+                'kode' => 'SKBM',
+                'nama' => 'Surat Keterangan Beda Nama',
+                'deskripsi' => 'Surat keterangan perbedaan nama pada dokumen',
+                'estimasi_hari' => 2,
+                'biaya' => 10000,
+                'persyaratan' => json_encode([
+                    ['field' => 'tujuan', 'label' => 'Tujuan Pembuatan', 'type' => 'text', 'required' => true],
+                    ['field' => 'nama_dokumen1', 'label' => 'Nama pada Dokumen 1', 'type' => 'text', 'required' => true],
+                    ['field' => 'nama_dokumen2', 'label' => 'Nama pada Dokumen 2', 'type' => 'text', 'required' => true],
+                    ['field' => 'ktp', 'label' => 'Foto KTP', 'type' => 'file', 'required' => true],
+                    ['field' => 'dokumen1', 'label' => 'Foto Dokumen 1', 'type' => 'file', 'required' => true],
+                    ['field' => 'dokumen2', 'label' => 'Foto Dokumen 2', 'type' => 'file', 'required' => true],
+                ]),
+                'template' => 'beda_nama',
+                'is_active' => true,
+            ],
+            [
+                'kode' => 'SKJ',
+                'nama' => 'Surat Keterangan Janda/Duda',
+                'deskripsi' => 'Surat keterangan status janda atau duda',
+                'estimasi_hari' => 3,
+                'biaya' => 20000,
+                'persyaratan' => json_encode([
+                    ['field' => 'tujuan', 'label' => 'Tujuan Pembuatan', 'type' => 'text', 'required' => true],
+                    ['field' => 'status_sebelumnya', 'label' => 'Status Sebelumnya', 'type' => 'text', 'required' => true],
+                    ['field' => 'tanggal_cerai_meninggal', 'label' => 'Tanggal Cerai/Meninggal', 'type' => 'date', 'required' => true],
+                    ['field' => 'ktp', 'label' => 'Foto KTP', 'type' => 'file', 'required' => true],
+                    ['field' => 'kk', 'label' => 'Foto Kartu Keluarga', 'type' => 'file', 'required' => true],
+                    ['field' => 'akta_cerai', 'label' => 'Akta Cerai/Surat Kematian', 'type' => 'file', 'required' => true],
+                ]),
+                'template' => 'janda_duda',
+                'is_active' => true,
+            ],
+        ];
+
+        foreach ($jenisSurat as $jenis) {
+            JenisSurat::updateOrCreate(
+                ['kode' => $jenis['kode']],
+                $jenis
+            );
+        }
+
+        echo "Jenis surat seeded successfully! Total: " . count($jenisSurat) . " jenis surat.\n";
+    }
+}
