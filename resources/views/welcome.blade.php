@@ -69,7 +69,7 @@
                             <i class="fas fa-landmark text-white text-2xl"></i>
                         </div>
                         <div>
-                            <h1 class="text-xl font-bold text-gray-900">Kelurahan<span class="text-blue-600">Digital</span></h1>
+                            <h1 class="text-xl font-bold text-gray-900">Kelurahan<span class="text-yellow-300">Digital</span></h1>
                             <p class="text-xs text-gray-500">Sistem Layanan Terpadu</p>
                         </div>
                     </div>
@@ -84,11 +84,11 @@
 
                     <!-- Auth Buttons -->
                     <div class="flex items-center space-x-4">
-                        <a href="{{ route('login') }}" class="hidden md:block text-gray-700 hover:text-blue-600 font-medium px-4 py-2 transition-colors">
+                        <a href="{{ route('login') }}" class="md:block text-gray-700 hover:text-blue-600 font-medium px-4 py-2 transition-colors">
                             <i class="fas fa-sign-in-alt mr-2"></i>Masuk
                         </a>
                         <a href="{{ route('register') }}" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-full font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105">
-                            <i class="fas fa-user-plus mr-2"></i>Daftar Gratis
+                            <i class="fas fa-user-plus mr-2"></i>Daftar
                         </a>
                     </div>
                 </div>
@@ -113,7 +113,7 @@
                         
                         <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
                             Transformasi Layanan
-                            <span class="gradient-text">Digital</span>
+                            <span class="text-yellow-300">Digital</span>
                             Untuk Masyarakat
                         </h1>
                         

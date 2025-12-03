@@ -39,7 +39,7 @@ class JenisSuratController extends Controller
 
         JenisSurat::create($validated);
 
-        return redirect()->route('admin.jenis-surat.index')
+        return redirect()->route('admin.jenis_surat.index')
             ->with('success', 'Jenis surat berhasil dibuat.');
     }
 
@@ -73,7 +73,7 @@ class JenisSuratController extends Controller
 
         $jenisSurat->update($validated);
 
-        return redirect()->route('admin.jenis-surat.index')
+        return redirect()->route('admin.jenis_surat.index')
             ->with('success', 'Jenis surat berhasil diperbarui.');
     }
 
@@ -86,7 +86,7 @@ class JenisSuratController extends Controller
 
         $jenisSurat->delete();
 
-        return redirect()->route('admin.jenis-surat.index')
+        return redirect()->route('admin.jenis_surat.index')
             ->with('success', 'Jenis surat berhasil dihapus.');
     }
 
@@ -103,13 +103,16 @@ class JenisSuratController extends Controller
 
     public function editTemplate(JenisSurat $jenisSurat)
     {
-        return view('admin.jenis-surat.edit-template', compact('jenisSurat'));
+        $availableTemplates = ['default', 'sktm', 'domisili', 'usaha'];
+        return view('admin.jenis-surat.edit-template', compact('jenisSurat', 'availableTemplates'));
     }
 
     public function updateTemplate(Request $request, JenisSurat $jenisSurat)
     {
+        $availableTemplates = ['default', 'sktm', 'domisili', 'usaha'];
+        
         $validated = $request->validate([
-            'template' => 'required|string',
+            'template' => 'required|string|in:' . implode(',', $availableTemplates),
         ]);
 
         $jenisSurat->update(['template' => $validated['template']]);
@@ -119,19 +122,134 @@ class JenisSuratController extends Controller
 
     public function previewTemplate(JenisSurat $jenisSurat)
     {
-        // Preview template dengan data dummy
-        $dummyData = [
+        // Available templates
+        $availableTemplates = ['default', 'sktm', 'domisili', 'usaha'];
+        
+        // Jika template tidak valid, gunakan default
+        if (!in_array($jenisSurat->template, $availableTemplates)) {
+            $jenisSurat->template = 'default';
+        }
+
+        // Data dummy untuk preview
+        $dummyData = $this->getDummyData($jenisSurat);
+
+        // Cari template di beberapa lokasi yang mungkin
+        $viewPaths = $this->getTemplateViewPaths($jenisSurat->template);
+        
+        foreach ($viewPaths as $viewPath) {
+            if (view()->exists($viewPath)) {
+                return view($viewPath, [
+                    'surat' => (object) [
+                        'nomor_surat' => 'XXX/YYYY/ZZZZ',
+                        'tanggal_surat' => now()->format('d-m-Y'),
+                        'perihal' => 'Surat ' . $jenisSurat->nama,
+                        'kode_surat' => $jenisSurat->kode,
+                    ],
+                    'user' => (object) $dummyData,
+                    'jenisSurat' => $jenisSurat,
+                    'data' => $dummyData,
+                    'tanggal' => now()->format('d F Y'),
+                    'today' => now()->format('Y-m-d'),
+                ]);
+            }
+        }
+
+        // Jika template tidak ditemukan di mana pun, tampilkan fallback
+        return $this->showTemplateFallback($jenisSurat);
+    }
+
+    /**
+     * Get dummy data for template preview
+     */
+    private function getDummyData(JenisSurat $jenisSurat): array
+    {
+        $defaultData = [
             'nama' => 'John Doe',
-            'alamat' => 'Jl. Contoh No. 123',
+            'alamat' => 'Jl. Contoh No. 123, Kelurahan Digital',
             'tujuan' => 'Keperluan Administrasi',
+            'tempat_lahir' => 'Jakarta',
+            'tanggal_lahir' => '1990-01-01',
+            'jenis_kelamin' => 'Laki-laki',
+            'agama' => 'Islam',
+            'pekerjaan' => 'Karyawan Swasta',
+            'nik' => '1234567890123456',
+            'kk' => '9876543210987654',
+            'no_telepon' => '081234567890',
+            'nama_usaha' => 'Toko Sembako Jaya',
+            'alamat_usaha' => 'Jl. Usaha No. 45',
+            'jenis_usaha' => 'Perdagangan',
+            'tahun_berdiri' => '2015',
         ];
 
-        return view('surat.templates.' . $jenisSurat->template, [
-            'surat' => (object) ['nomor_surat' => 'XXX/YYYY/ZZZZ'],
-            'user' => (object) $dummyData,
+        // Decode persyaratan untuk menambahkan data dummy yang sesuai
+        $persyaratan = json_decode($jenisSurat->persyaratan, true) ?? [];
+        foreach ($persyaratan as $item) {
+            if (!isset($defaultData[$item['field']])) {
+                // Generate dummy value based on field name
+                $dummyValue = $this->generateDummyValue($item['field'], $item['label'], $item['type']);
+                $defaultData[$item['field']] = $dummyValue;
+            }
+        }
+
+        return $defaultData;
+    }
+
+    /**
+     * Generate dummy value based on field information
+     */
+    private function generateDummyValue(string $field, string $label, string $type): string
+    {
+        switch ($type) {
+            case 'number':
+                return rand(1000, 9999);
+            case 'date':
+                return now()->subYears(rand(1, 30))->format('Y-m-d');
+            case 'file':
+                return 'dummy_file.pdf';
+            default:
+                // Coba tebak berdasarkan nama field atau label
+                $lowerField = strtolower($field);
+                $lowerLabel = strtolower($label);
+                
+                if (str_contains($lowerField, 'email') || str_contains($lowerLabel, 'email')) {
+                    return 'contoh@email.com';
+                } elseif (str_contains($lowerField, 'phone') || str_contains($lowerField, 'telp') || 
+                         str_contains($lowerLabel, 'telepon')) {
+                    return '0812' . rand(1000000, 9999999);
+                } elseif (str_contains($lowerField, 'nama') || str_contains($lowerLabel, 'nama')) {
+                    return 'Contoh ' . $label;
+                } else {
+                    return 'Data Contoh ' . $label;
+                }
+        }
+    }
+
+    /**
+     * Get possible view paths for template
+     */
+    private function getTemplateViewPaths(string $templateName): array
+    {
+        return [
+            'admin.jenis-surat.templates.' . $templateName,
+            'surat.templates.' . $templateName,
+            'templates.' . $templateName,
+            'admin.templates.' . $templateName,
+        ];
+    }
+
+    /**
+     * Show fallback page when template is not found
+     */
+    private function showTemplateFallback(JenisSurat $jenisSurat)
+    {
+        $dummyData = $this->getDummyData($jenisSurat);
+        
+        return view('admin.jenis-surat.template-fallback', [
             'jenisSurat' => $jenisSurat,
-            'data' => $dummyData,
-            'tanggal' => now()->format('d F Y'),
+            'dummyData' => $dummyData,
+            'templateName' => $jenisSurat->template,
+            'availableTemplates' => ['default', 'sktm', 'domisili', 'usaha'],
+            'viewPaths' => $this->getTemplateViewPaths($jenisSurat->template),
         ]);
     }
 }

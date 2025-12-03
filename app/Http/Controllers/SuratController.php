@@ -35,12 +35,15 @@ class SuratController extends Controller
 
     public function storeDraft(Request $request, JenisSurat $jenisSurat)
     {
-        $validated = $request->validate($this->getValidationRules($jenisSurat));
+        // Decode persyaratan JSON
+        $persyaratan = json_decode($jenisSurat->persyaratan, true) ?? [];
+        
+        $validated = $request->validate($this->getValidationRules($persyaratan));
 
         // Handle file upload untuk persyaratan
         $filePaths = [];
-        foreach ($jenisSurat->persyaratan as $syarat) {
-            if ($request->hasFile("file_{$syarat['field']}")) {
+        foreach ($persyaratan as $syarat) {
+            if ($syarat['type'] === 'file' && $request->hasFile("file_{$syarat['field']}")) {
                 $file = $request->file("file_{$syarat['field']}");
                 $path = $file->store("surat/persyaratan/{$jenisSurat->kode}", 'public');
                 $filePaths[$syarat['field']] = $path;
@@ -105,12 +108,15 @@ class SuratController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $validated = $request->validate($this->getValidationRules($surat->jenisSurat));
+        // Decode persyaratan JSON
+        $persyaratan = json_decode($surat->jenisSurat->persyaratan, true) ?? [];
+        
+        $validated = $request->validate($this->getValidationRules($persyaratan));
 
         // Handle file upload update
         $filePaths = $surat->file_persyaratan ?? [];
-        foreach ($surat->jenisSurat->persyaratan as $syarat) {
-            if ($request->hasFile("file_{$syarat['field']}")) {
+        foreach ($persyaratan as $syarat) {
+            if ($syarat['type'] === 'file' && $request->hasFile("file_{$syarat['field']}")) {
                 // Hapus file lama jika ada
                 if (isset($filePaths[$syarat['field']])) {
                     Storage::disk('public')->delete($filePaths[$syarat['field']]);
@@ -138,9 +144,11 @@ class SuratController extends Controller
         }
 
         // Hapus file persyaratan
-        if ($surat->file_persyaratan) {
+        if ($surat->file_persyaratan && is_array($surat->file_persyaratan)) {
             foreach ($surat->file_persyaratan as $file) {
-                Storage::disk('public')->delete($file);
+                if ($file && is_string($file)) {
+                    Storage::disk('public')->delete($file);
+                }
             }
         }
 
@@ -241,14 +249,18 @@ class SuratController extends Controller
         ]);
     }
 
-    private function getValidationRules(JenisSurat $jenisSurat)
+    private function getValidationRules(array $persyaratan)
     {
         $rules = [];
-        foreach ($jenisSurat->persyaratan as $syarat) {
+        foreach ($persyaratan as $syarat) {
             if ($syarat['type'] === 'file') {
-                $rules["file_{$syarat['field']}"] = 'required|file|mimes:pdf,jpg,jpeg,png|max:5120';
+                $rules["file_{$syarat['field']}"] = $syarat['required'] 
+                    ? 'required|file|mimes:pdf,jpg,jpeg,png|max:5120'
+                    : 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120';
             } else {
-                $rules[$syarat['field']] = 'required|string|max:255';
+                $rules[$syarat['field']] = $syarat['required'] 
+                    ? 'required|string|max:255'
+                    : 'nullable|string|max:255';
             }
         }
         return $rules;

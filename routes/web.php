@@ -133,7 +133,7 @@ Route::middleware(['auth', 'verified', 'role:petugas,admin'])->prefix('petugas')
     // PENGADUAN PETUGAS
     Route::prefix('pengaduan')->name('pengaduan.')->group(function () {
         Route::get('/', [PetugasPengaduanController::class, 'index'])->name('index');
-        Route::get('/tugas-saya', [PetugasPengaduanController::class, 'tugasSaya'])->name('tugas.saya'); // ✅ SUDAH DITAMBAHKAN
+        Route::get('/tugas-saya', [PetugasPengaduanController::class, 'tugasSaya'])->name('tugas-saya'); // ✅ SUDAH DITAMBAHKAN
         Route::get('/{pengaduan}', [PetugasPengaduanController::class, 'show'])->name('show');
         Route::put('/{pengaduan}/status', [PetugasPengaduanController::class, 'updateStatus'])->name('update.status');
         Route::put('/{pengaduan}/tindakan', [PetugasPengaduanController::class, 'updateTindakan'])->name('update.tindakan');
@@ -172,11 +172,11 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
         Route::post('/', [AdminUserController::class, 'store'])->name('store');
         Route::get('/{user}', [AdminUserController::class, 'show'])->name('show');
         Route::get('/{user}/edit', [AdminUserController::class, 'edit'])->name('edit');
-        Route::put('/{user}', [AdminUserController::class, 'update'])->name('update');
+        Route::post('/{user}', [AdminUserController::class, 'update'])->name('update');
         Route::delete('/{user}', [AdminUserController::class, 'destroy'])->name('destroy');
-        Route::put('/{user}/verify', [AdminUserController::class, 'verify'])->name('verify');
-        Route::put('/{user}/role', [AdminUserController::class, 'updateRole'])->name('update.role');
-        Route::put('/{user}/status', [AdminUserController::class, 'updateStatus'])->name('update.status');
+        Route::post('/{user}/verify', [AdminUserController::class, 'verify'])->name('verify');
+        Route::post('/{user}/role', [AdminUserController::class, 'updateRole'])->name('update.role');
+        Route::post('/{user}/status', [AdminUserController::class, 'updateStatus'])->name('update.status');
     });
 
     // PENGADUAN ADMIN
@@ -221,7 +221,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
         Route::get('/{surat}/download', [AdminSuratController::class, 'download'])->name('download');
     });
 
-    // MASTER DATA MANAGEMENT
     
     // Kategori Pengaduan
     Route::prefix('kategori-pengaduan')->name('kategori_pengaduan.')->group(function () {

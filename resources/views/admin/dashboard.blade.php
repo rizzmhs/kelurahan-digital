@@ -179,7 +179,7 @@
                             <p class="text-sm font-medium text-gray-900">Kelola User</p>
                         </a>
 
-                        <a href="{{ route('admin.kategori-pengaduan.index') }}" class="p-4 border border-gray-200 rounded-lg hover:bg-orange-50 transition duration-150 text-center">
+                        <a href="{{ route('admin.kategori_pengaduan.index') }}" class="p-4 border border-gray-200 rounded-lg hover:bg-orange-50 transition duration-150 text-center">
                             <div class="p-2 bg-orange-100 rounded-lg inline-flex mb-2">
                                 <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
