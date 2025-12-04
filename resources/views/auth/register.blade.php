@@ -16,39 +16,24 @@
         
         <!-- Additional Styles -->
         <script src="https://cdn.tailwindcss.com"></script>
+        
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
             
-            .font-poppins {
-                font-family: 'Poppins', sans-serif;
-            }
-            
-            .gradient-bg {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            }
-            
-            .gradient-text {
+            .font-poppins { font-family: 'Poppins', sans-serif; }
+            .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+            .gradient-text { 
                 background: linear-gradient(90deg, #667eea, #764ba2);
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
             }
-            
-            .card-hover {
-                transition: all 0.3s ease;
+            .card-hover:hover { 
+                transform: translateY(-5px); 
+                box-shadow: 0 20px 40px rgba(102, 126, 234, 0.1); 
             }
-            
-            .card-hover:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 20px 40px rgba(102, 126, 234, 0.1);
-            }
-            
-            .form-input-custom {
-                transition: all 0.3s ease;
-            }
-            
-            .form-input-custom:focus {
-                border-color: #667eea;
-                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            .form-input-custom:focus { 
+                border-color: #667eea; 
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); 
             }
             
             /* Animation for checkmark */
@@ -83,45 +68,33 @@
             }
             
             @keyframes stroke {
-                100% {
-                    stroke-dashoffset: 0;
-                }
+                100% { stroke-dashoffset: 0; }
             }
             
             @keyframes scale {
-                0%, 100% {
-                    transform: none;
-                }
-                50% {
-                    transform: scale3d(1.1, 1.1, 1);
-                }
+                0%, 100% { transform: none; }
+                50% { transform: scale3d(1.1, 1.1, 1); }
             }
             
             @keyframes fill {
-                100% {
-                    box-shadow: inset 0px 0px 0px 30px #10b981;
-                }
+                100% { box-shadow: inset 0px 0px 0px 30px #10b981; }
             }
             
             /* Upload area animations */
-            .upload-success {
+            .upload-success-pulse {
                 animation: successPulse 2s infinite;
             }
             
             @keyframes successPulse {
-                0% {
-                    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
-                }
-                70% {
-                    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
-                }
-                100% {
-                    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-                }
+                0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+                70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
             }
+            
+            [x-cloak] { display: none !important; }
         </style>
     </head>
-    <body class="font-poppins antialiased bg-gray-50">
+    <body class="font-poppins antialiased bg-gray-50" x-data="registerPage()" x-init="init()">
         <!-- Navigation -->
         <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-md shadow-lg">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -276,7 +249,8 @@
                             @endif
 
                             <!-- Form -->
-                            <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data" id="registerForm" class="space-y-6">
+                            <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data" id="registerForm" 
+                                  class="space-y-6" x-on:submit="validateForm($event)">
                                 @csrf
 
                                 <!-- Name & NIK -->
@@ -300,7 +274,7 @@
                                         <input type="text" id="nik" name="nik" value="{{ old('nik') }}"
                                                class="w-full px-4 py-3 border border-gray-300 rounded-lg form-input-custom focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                required maxlength="16" minlength="16" pattern="[0-9]{16}"
-                                               oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                                               x-on:input="$event.target.value = $event.target.value.replace(/[^0-9]/g, '')">
                                         <p class="mt-1 text-xs text-gray-500">16 digit angka (tanpa huruf dan spasi)</p>
                                         @error('nik')
                                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -329,7 +303,7 @@
                                         <input type="tel" id="telepon" name="telepon" value="{{ old('telepon') }}"
                                                class="w-full px-4 py-3 border border-gray-300 rounded-lg form-input-custom focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                required pattern="[0-9]{10,13}"
-                                               oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                                               x-on:input="$event.target.value = $event.target.value.replace(/[^0-9]/g, '')">
                                         <p class="mt-1 text-xs text-gray-500">10-13 digit angka</p>
                                         @error('telepon')
                                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -345,7 +319,7 @@
                                         </label>
                                         <input type="date" id="tanggal_lahir" name="tanggal_lahir" value="{{ old('tanggal_lahir') }}"
                                                class="w-full px-4 py-3 border border-gray-300 rounded-lg form-input-custom focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                               required max="{{ date('Y-m-d', strtotime('-17 years')) }}">
+                                               required :max="maxDate">
                                         @error('tanggal_lahir')
                                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
@@ -382,14 +356,21 @@
                                     @enderror
                                 </div>
 
-                                <!-- KTP Photo Upload - MODIFIED SECTION -->
+                                <!-- KTP Photo Upload -->
                                 <div>
                                     <label for="foto_ktp" class="block text-sm font-medium text-gray-700 mb-2">
                                         <i class="fas fa-camera mr-2"></i>Foto KTP *
                                     </label>
-                                    <div id="upload-container" class="mt-1">
-                                        <!-- Default Upload State -->
-                                        <div id="upload-default" class="flex justify-center px-6 pt-8 pb-8 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-500 transition-all duration-300 cursor-pointer bg-white">
+                                    <div class="mt-1">
+                                        <!-- Upload States -->
+                                        <div x-show="uploadState === 'default'" x-cloak
+                                             x-on:click="$refs.fileInput.click()"
+                                             x-on:dragenter.prevent="handleDragEnter"
+                                             x-on:dragover.prevent="handleDragEnter" 
+                                             x-on:dragleave.prevent="handleDragLeave"
+                                             x-on:drop.prevent="handleDrop($event)"
+                                             class="flex justify-center px-6 pt-8 pb-8 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-500 transition-all duration-300 cursor-pointer bg-white"
+                                             :class="{ 'border-blue-500 bg-blue-50': isDragging }">
                                             <div class="space-y-3 text-center">
                                                 <div class="flex justify-center">
                                                     <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-50 rounded-full flex items-center justify-center">
@@ -404,12 +385,13 @@
                                                     <p>Format: JPG, JPEG, PNG, PDF</p>
                                                     <p>Maksimal: 2MB</p>
                                                 </div>
-                                                <input id="foto_ktp" name="foto_ktp" type="file" accept=".jpg,.jpeg,.png,.pdf" class="hidden" required>
                                             </div>
                                         </div>
 
-                                        <!-- Success State (Hidden by default) -->
-                                        <div id="upload-success" class="hidden flex justify-center px-6 pt-8 pb-8 border-2 border-dashed border-green-500 rounded-xl bg-green-50 upload-success">
+                                        <!-- Success State -->
+                                        <div x-show="uploadState === 'success'" x-cloak
+                                             class="flex justify-center px-6 pt-8 pb-8 border-2 border-dashed border-green-500 rounded-xl bg-green-50"
+                                             :class="{ 'upload-success-pulse': showPulse }">
                                             <div class="space-y-4 text-center">
                                                 <!-- Animated Checkmark -->
                                                 <div class="flex justify-center">
@@ -427,19 +409,21 @@
                                                 </div>
                                                 <div class="space-y-1">
                                                     <p class="text-sm font-medium text-green-700">File berhasil diupload!</p>
-                                                    <p id="file-name" class="text-xs text-green-600"></p>
-                                                    <p id="file-size" class="text-xs text-green-500"></p>
+                                                    <p class="text-xs text-green-600" x-text="uploadedFileName"></p>
+                                                    <p class="text-xs text-green-500" x-text="uploadedFileSize"></p>
                                                 </div>
                                                 <div>
-                                                    <button type="button" onclick="removeFile()" class="text-xs text-red-600 hover:text-red-800 font-medium">
+                                                    <button type="button" x-on:click="removeFile()" 
+                                                            class="text-xs text-red-600 hover:text-red-800 font-medium">
                                                         <i class="fas fa-trash-alt mr-1"></i> Hapus file
                                                     </button>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <!-- Error State (Hidden by default) -->
-                                        <div id="upload-error" class="hidden flex justify-center px-6 pt-8 pb-8 border-2 border-dashed border-red-300 rounded-xl bg-red-50">
+                                        <!-- Error State -->
+                                        <div x-show="uploadState === 'error'" x-cloak
+                                             class="flex justify-center px-6 pt-8 pb-8 border-2 border-dashed border-red-300 rounded-xl bg-red-50">
                                             <div class="space-y-3 text-center">
                                                 <div class="flex justify-center">
                                                     <div class="w-16 h-16 bg-gradient-to-br from-red-100 to-red-50 rounded-full flex items-center justify-center">
@@ -447,14 +431,20 @@
                                                     </div>
                                                 </div>
                                                 <div class="space-y-1">
-                                                    <p id="error-message" class="text-sm font-medium text-red-700"></p>
+                                                    <p class="text-sm font-medium text-red-700" x-text="uploadError"></p>
                                                     <p class="text-xs text-red-500">Silakan upload file yang sesuai</p>
                                                 </div>
-                                                <button type="button" onclick="retryUpload()" class="text-xs text-blue-600 hover:text-blue-800 font-medium">
+                                                <button type="button" x-on:click="retryUpload()" 
+                                                        class="text-xs text-blue-600 hover:text-blue-800 font-medium">
                                                     <i class="fas fa-redo mr-1"></i> Coba lagi
                                                 </button>
                                             </div>
                                         </div>
+
+                                        <!-- Hidden File Input -->
+                                        <input type="file" id="foto_ktp" name="foto_ktp" x-ref="fileInput" 
+                                               accept=".jpg,.jpeg,.png,.pdf" class="hidden" required
+                                               x-on:change="handleFileSelect($event)">
                                     </div>
                                     @error('foto_ktp')
                                         <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -469,14 +459,16 @@
                                             <i class="fas fa-lock mr-2"></i>Password *
                                         </label>
                                         <div class="relative">
-                                            <input type="password" id="password" name="password"
+                                            <input :type="showPassword ? 'text' : 'password'" id="password" name="password"
                                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg form-input-custom focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                   required autocomplete="new-password">
-                                            <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center" onclick="togglePassword('password')">
-                                                <i class="fas fa-eye text-gray-400"></i>
+                                                   required autocomplete="new-password"
+                                                   x-on:input="checkPasswordStrength($event.target.value)">
+                                            <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                                    x-on:click="showPassword = !showPassword">
+                                                <i class="fas" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
                                             </button>
                                         </div>
-                                        <div id="password-strength" class="mt-2 text-sm"></div>
+                                        <div id="password-strength" class="mt-2 text-sm" x-html="passwordStrengthText"></div>
                                         @error('password')
                                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
@@ -487,13 +479,18 @@
                                             <i class="fas fa-lock mr-2"></i>Konfirmasi Password *
                                         </label>
                                         <div class="relative">
-                                            <input type="password" id="password_confirmation" name="password_confirmation"
+                                            <input :type="showConfirmPassword ? 'text' : 'password'" id="password_confirmation" name="password_confirmation"
                                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg form-input-custom focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                   required autocomplete="new-password">
-                                            <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center" onclick="togglePassword('password_confirmation')">
-                                                <i class="fas fa-eye text-gray-400"></i>
+                                                   required autocomplete="new-password"
+                                                   :class="{ 'border-red-500': passwordMismatch && passwordConfirmInput }"
+                                                   x-on:input="checkPasswordMatch()">
+                                            <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                                    x-on:click="showConfirmPassword = !showConfirmPassword">
+                                                <i class="fas" :class="showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
                                             </button>
                                         </div>
+                                        <p x-show="passwordMismatch && passwordConfirmInput" x-cloak 
+                                           class="mt-2 text-sm text-red-600">Password tidak cocok</p>
                                         @error('password_confirmation')
                                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
@@ -522,8 +519,10 @@
 
                                 <!-- Submit Button -->
                                 <button type="submit" id="submitBtn"
-                                        class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-6 rounded-lg font-bold text-lg hover:shadow-lg transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <i class="fas fa-user-plus mr-3"></i>Daftar Akun
+                                        class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-6 rounded-lg font-bold text-lg hover:shadow-lg transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                                        :disabled="!formValid">
+                                    <i class="fas fa-user-plus mr-3" :class="{ 'fa-spinner fa-spin': isSubmitting }"></i>
+                                    <span x-text="isSubmitting ? 'Memproses...' : 'Daftar Akun'"></span>
                                 </button>
 
                                 <!-- Login Link -->
@@ -542,256 +541,199 @@
             </div>
         </main>
 
-        <!-- Footer (Included from Layout) -->
+        <!-- Footer -->
         @include('layouts.footer')
 
-        <!-- JavaScript -->
+        <!-- JavaScript Clean -->
         <script>
-            // Navbar background on scroll
-            window.addEventListener('scroll', function() {
-                const nav = document.querySelector('nav');
-                if (window.scrollY > 50) {
-                    nav.classList.add('bg-white', 'shadow-lg');
-                    nav.classList.remove('bg-white/90');
-                } else {
-                    nav.classList.remove('bg-white', 'shadow-lg');
-                    nav.classList.add('bg-white/90');
-                }
-            });
-
-            // Upload file functionality
-            const uploadDefault = document.getElementById('upload-default');
-            const uploadSuccess = document.getElementById('upload-success');
-            const uploadError = document.getElementById('upload-error');
-            const fileInput = document.getElementById('foto_ktp');
-            const fileNameDisplay = document.getElementById('file-name');
-            const fileSizeDisplay = document.getElementById('file-size');
-            const errorMessageDisplay = document.getElementById('error-message');
-
-            // Click to upload
-            uploadDefault.addEventListener('click', function() {
-                fileInput.click();
-            });
-
-            // Drag and drop functionality
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                uploadDefault.addEventListener(eventName, preventDefaults, false);
-            });
-
-            function preventDefaults(e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-
-            ['dragenter', 'dragover'].forEach(eventName => {
-                uploadDefault.addEventListener(eventName, highlight, false);
-            });
-
-            ['dragleave', 'drop'].forEach(eventName => {
-                uploadDefault.addEventListener(eventName, unhighlight, false);
-            });
-
-            function highlight() {
-                uploadDefault.classList.add('border-blue-500', 'bg-blue-50');
-            }
-
-            function unhighlight() {
-                uploadDefault.classList.remove('border-blue-500', 'bg-blue-50');
-            }
-
-            // Handle file drop
-            uploadDefault.addEventListener('drop', handleDrop, false);
-
-            function handleDrop(e) {
-                const dt = e.dataTransfer;
-                const files = dt.files;
-                handleFiles(files);
-            }
-
-            // Handle file input change
-            fileInput.addEventListener('change', function(e) {
-                handleFiles(this.files);
-            });
-
-            function handleFiles(files) {
-                const file = files[0];
-                if (!file) return;
-
-                const maxSize = 2 * 1024 * 1024; // 2MB
-                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
-
-                // Reset all states first
-                uploadDefault.classList.add('hidden');
-                uploadSuccess.classList.add('hidden');
-                uploadError.classList.add('hidden');
-
-                // Validate file
-                if (!allowedTypes.includes(file.type)) {
-                    errorMessageDisplay.textContent = 'Format file tidak didukung. Harap upload JPG, JPEG, PNG, atau PDF.';
-                    uploadError.classList.remove('hidden');
-                    fileInput.value = '';
-                    return;
-                }
-
-                if (file.size > maxSize) {
-                    errorMessageDisplay.textContent = 'Ukuran file terlalu besar. Maksimal 2MB.';
-                    uploadError.classList.remove('hidden');
-                    fileInput.value = '';
-                    return;
-                }
-
-                // Show success state
-                fileNameDisplay.textContent = file.name;
-                fileSizeDisplay.textContent = `(${(file.size / 1024 / 1024).toFixed(2)} MB)`;
-                uploadSuccess.classList.remove('hidden');
-
-                // Add pulse animation
-                setTimeout(() => {
-                    uploadSuccess.classList.add('upload-success');
-                }, 100);
-            }
-
-            // Remove file
-            function removeFile() {
-                fileInput.value = '';
-                uploadSuccess.classList.add('hidden');
-                uploadDefault.classList.remove('hidden');
-                uploadSuccess.classList.remove('upload-success');
-            }
-
-            // Retry upload
-            function retryUpload() {
-                uploadError.classList.add('hidden');
-                uploadDefault.classList.remove('hidden');
-                fileInput.click();
-            }
-
-            // Toggle password visibility
-            function togglePassword(fieldId) {
-                const passwordInput = document.getElementById(fieldId);
-                const toggleIcon = passwordInput.nextElementSibling.querySelector('i');
-                
-                if (passwordInput.type === 'password') {
-                    passwordInput.type = 'text';
-                    toggleIcon.classList.remove('fa-eye');
-                    toggleIcon.classList.add('fa-eye-slash');
-                } else {
-                    passwordInput.type = 'password';
-                    toggleIcon.classList.remove('fa-eye-slash');
-                    toggleIcon.classList.add('fa-eye');
-                }
-            }
-
-            // Real-time password strength checker
-            document.getElementById('password').addEventListener('input', function() {
-                const password = this.value;
-                const strengthIndicator = document.getElementById('password-strength');
-                
-                if (!strengthIndicator) {
-                    const indicator = document.createElement('div');
-                    indicator.id = 'password-strength';
-                    indicator.className = 'mt-2 text-sm';
-                    this.parentNode.parentNode.appendChild(indicator);
-                }
-                
-                let strength = 0;
-                const messages = ['Sangat lemah', 'Lemah', 'Cukup', 'Kuat', 'Sangat kuat'];
-                const colors = ['text-red-600', 'text-orange-600', 'text-yellow-600', 'text-blue-600', 'text-green-600'];
-                const icons = ['fas fa-times-circle', 'fas fa-exclamation-triangle', 'fas fa-check-circle', 'fas fa-thumbs-up', 'fas fa-shield-alt'];
-                
-                if (password.length >= 8) strength++;
-                if (/[A-Z]/.test(password)) strength++;
-                if (/[0-9]/.test(password)) strength++;
-                if (/[^A-Za-z0-9]/.test(password)) strength++;
-                
-                strengthIndicator.innerHTML = `
-                    <i class="${icons[strength]} mr-2"></i>
-                    <span class="${colors[strength]}">Kekuatan password: ${messages[strength]}</span>
-                `;
-                
-                // Check password match
-                const confirmPassword = document.getElementById('password_confirmation');
-                if (confirmPassword.value) {
-                    validatePasswordMatch();
-                }
-            });
-
-            // Validate password match
-            function validatePasswordMatch() {
-                const password = document.getElementById('password').value;
-                const confirmPassword = document.getElementById('password_confirmation').value;
-                const submitBtn = document.getElementById('submitBtn');
-                
-                if (password && confirmPassword) {
-                    if (password !== confirmPassword) {
-                        // Add error styling
-                        document.getElementById('password_confirmation').classList.add('border-red-500');
-                        document.getElementById('password_confirmation').classList.remove('border-gray-300');
-                        submitBtn.disabled = true;
+            function registerPage() {
+                return {
+                    // States
+                    showPassword: false,
+                    showConfirmPassword: false,
+                    uploadState: 'default',
+                    isDragging: false,
+                    showPulse: false,
+                    uploadedFileName: '',
+                    uploadedFileSize: '',
+                    uploadError: '',
+                    passwordStrength: 0,
+                    passwordStrengthText: '',
+                    passwordMismatch: false,
+                    passwordConfirmInput: false,
+                    isSubmitting: false,
+                    formValid: false,
+                    
+                    // Computed properties
+                    maxDate: new Date(new Date().setFullYear(new Date().getFullYear() - 17)).toISOString().split('T')[0],
+                    
+                    // Initialize
+                    init() {
+                        this.initNavbarScroll();
+                        this.watchFormValidity();
                         
-                        // Show error message
-                        let errorMsg = document.getElementById('password-match-error');
-                        if (!errorMsg) {
-                            errorMsg = document.createElement('p');
-                            errorMsg.id = 'password-match-error';
-                            errorMsg.className = 'mt-2 text-sm text-red-600';
-                            document.getElementById('password_confirmation').parentNode.appendChild(errorMsg);
+                        // Check if there's a previously uploaded file (on form error)
+                        const fileInput = this.$refs.fileInput;
+                        if (fileInput && fileInput.files.length > 0) {
+                            this.handleFiles(fileInput.files);
                         }
-                        errorMsg.textContent = 'Password tidak cocok';
-                    } else {
-                        // Remove error styling
-                        document.getElementById('password_confirmation').classList.remove('border-red-500');
-                        document.getElementById('password_confirmation').classList.add('border-gray-300');
-                        submitBtn.disabled = false;
+                    },
+                    
+                    // Upload handlers
+                    handleDragEnter() {
+                        this.isDragging = true;
+                    },
+                    
+                    handleDragLeave() {
+                        this.isDragging = false;
+                    },
+                    
+                    handleDrop(e) {
+                        this.isDragging = false;
+                        const files = e.dataTransfer.files;
+                        this.handleFiles(files);
+                    },
+                    
+                    handleFileSelect(e) {
+                        this.handleFiles(e.target.files);
+                    },
+                    
+                    handleFiles(files) {
+                        const file = files[0];
+                        if (!file) return;
                         
-                        // Remove error message
-                        const errorMsg = document.getElementById('password-match-error');
-                        if (errorMsg) {
-                            errorMsg.remove();
+                        const maxSize = 2 * 1024 * 1024; // 2MB
+                        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+                        
+                        // Validate file
+                        if (!allowedTypes.includes(file.type)) {
+                            this.uploadState = 'error';
+                            this.uploadError = 'Format file tidak didukung. Harap upload JPG, JPEG, PNG, atau PDF.';
+                            this.$refs.fileInput.value = '';
+                            return;
                         }
+                        
+                        if (file.size > maxSize) {
+                            this.uploadState = 'error';
+                            this.uploadError = 'Ukuran file terlalu besar. Maksimal 2MB.';
+                            this.$refs.fileInput.value = '';
+                            return;
+                        }
+                        
+                        // Show success state
+                        this.uploadState = 'success';
+                        this.uploadedFileName = file.name;
+                        this.uploadedFileSize = `(${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                        
+                        // Add pulse animation
+                        this.showPulse = true;
+                        setTimeout(() => {
+                            this.showPulse = false;
+                        }, 4000);
+                        
+                        // Re-check form validity
+                        this.watchFormValidity();
+                    },
+                    
+                    removeFile() {
+                        this.$refs.fileInput.value = '';
+                        this.uploadState = 'default';
+                        this.showPulse = false;
+                        this.watchFormValidity();
+                    },
+                    
+                    retryUpload() {
+                        this.uploadState = 'default';
+                        this.$refs.fileInput.click();
+                    },
+                    
+                    // Password handlers
+                    checkPasswordStrength(password) {
+                        let strength = 0;
+                        const messages = ['Sangat lemah', 'Lemah', 'Cukup', 'Kuat', 'Sangat kuat'];
+                        const colors = ['text-red-600', 'text-orange-600', 'text-yellow-600', 'text-blue-600', 'text-green-600'];
+                        const icons = ['fas fa-times-circle', 'fas fa-exclamation-triangle', 'fas fa-check-circle', 'fas fa-thumbs-up', 'fas fa-shield-alt'];
+                        
+                        if (password.length >= 8) strength++;
+                        if (/[A-Z]/.test(password)) strength++;
+                        if (/[0-9]/.test(password)) strength++;
+                        if (/[^A-Za-z0-9]/.test(password)) strength++;
+                        
+                        this.passwordStrength = strength;
+                        this.passwordStrengthText = `
+                            <i class="${icons[strength]} mr-2"></i>
+                            <span class="${colors[strength]}">Kekuatan password: ${messages[strength]}</span>
+                        `;
+                        
+                        this.checkPasswordMatch();
+                        this.watchFormValidity();
+                    },
+                    
+                    checkPasswordMatch() {
+                        const password = document.getElementById('password')?.value || '';
+                        const confirmPassword = document.getElementById('password_confirmation')?.value || '';
+                        
+                        this.passwordConfirmInput = !!confirmPassword;
+                        this.passwordMismatch = confirmPassword && password !== confirmPassword;
+                        this.watchFormValidity();
+                    },
+                    
+                    // Form validation
+                    watchFormValidity() {
+                        const password = document.getElementById('password')?.value || '';
+                        const confirmPassword = document.getElementById('password_confirmation')?.value || '';
+                        const hasFile = this.$refs.fileInput?.files?.length > 0;
+                        const termsChecked = document.getElementById('terms')?.checked;
+                        
+                        this.formValid = password && 
+                                         !this.passwordMismatch && 
+                                         hasFile && 
+                                         termsChecked &&
+                                         this.passwordStrength >= 2; // At least "Cukup"
+                    },
+                    
+                    validateForm(e) {
+                        const password = document.getElementById('password')?.value || '';
+                        const confirmPassword = document.getElementById('password_confirmation')?.value || '';
+                        const hasFile = this.$refs.fileInput?.files?.length > 0;
+                        
+                        // Check password match
+                        if (password !== confirmPassword) {
+                            e.preventDefault();
+                            alert('Password dan konfirmasi password tidak cocok');
+                            return;
+                        }
+                        
+                        // Check if file is uploaded
+                        if (!hasFile) {
+                            e.preventDefault();
+                            alert('Silakan upload foto KTP terlebih dahulu');
+                            return;
+                        }
+                        
+                        // Check password strength
+                        if (this.passwordStrength < 2) {
+                            e.preventDefault();
+                            alert('Password terlalu lemah. Gunakan minimal 8 karakter dengan kombinasi huruf besar, angka, dan simbol.');
+                            return;
+                        }
+                        
+                        // Prevent double submission
+                        this.isSubmitting = true;
+                        e.target.submit();
+                    },
+                    
+                    // Utilities
+                    initNavbarScroll() {
+                        window.addEventListener('scroll', () => {
+                            const nav = document.querySelector('nav');
+                            nav.classList.toggle('bg-white', window.scrollY > 50);
+                            nav.classList.toggle('shadow-lg', window.scrollY > 50);
+                            nav.classList.toggle('bg-white/90', window.scrollY <= 50);
+                        });
                     }
                 }
             }
-
-            // Add event listener for confirm password
-            document.getElementById('password_confirmation').addEventListener('input', validatePasswordMatch);
-
-            // Set max date for date of birth (17 years ago)
-            document.addEventListener('DOMContentLoaded', function() {
-                const today = new Date();
-                const minDate = new Date(today.getFullYear() - 17, today.getMonth(), today.getDate());
-                document.getElementById('tanggal_lahir').max = minDate.toISOString().split('T')[0];
-
-                // Check if there's a previously uploaded file (on form error)
-                if (fileInput.files.length > 0) {
-                    handleFiles(fileInput.files);
-                }
-            });
-
-            // Form validation before submit
-            document.getElementById('registerForm').addEventListener('submit', function(e) {
-                const submitBtn = document.getElementById('submitBtn');
-                const password = document.getElementById('password').value;
-                const confirmPassword = document.getElementById('password_confirmation').value;
-                
-                // Check password match
-                if (password !== confirmPassword) {
-                    e.preventDefault();
-                    alert('Password dan konfirmasi password tidak cocok');
-                    return;
-                }
-
-                // Check if file is uploaded
-                if (!fileInput.files.length) {
-                    e.preventDefault();
-                    alert('Silakan upload foto KTP terlebih dahulu');
-                    return;
-                }
-                
-                // Disable submit button to prevent double submission
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-3"></i>Memproses...';
-            });
         </script>
     </body>
 </html>

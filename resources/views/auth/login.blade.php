@@ -16,51 +16,31 @@
         
         <!-- Additional Styles -->
         <script src="https://cdn.tailwindcss.com"></script>
+        
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
             
-            .font-poppins {
-                font-family: 'Poppins', sans-serif;
-            }
-            
-            .gradient-bg {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            }
-            
-            .gradient-text {
+            .font-poppins { font-family: 'Poppins', sans-serif; }
+            .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+            .gradient-text { 
                 background: linear-gradient(90deg, #667eea, #764ba2);
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
             }
-            
-            .card-hover {
-                transition: all 0.3s ease;
+            .card-hover { transition: all 0.3s ease; }
+            .card-hover:hover { 
+                transform: translateY(-5px); 
+                box-shadow: 0 20px 40px rgba(102, 126, 234, 0.1); 
             }
-            
-            .card-hover:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 20px 40px rgba(102, 126, 234, 0.1);
+            .form-input-custom:focus { 
+                border-color: #667eea; 
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); 
             }
-            
-            .form-input-custom {
-                transition: all 0.3s ease;
-            }
-            
-            .form-input-custom:focus {
-                border-color: #667eea;
-                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            }
-            
-            .social-login-btn {
-                transition: all 0.3s ease;
-            }
-            
-            .social-login-btn:hover {
-                transform: translateY(-2px);
-            }
+            .social-login-btn:hover { transform: translateY(-2px); }
+            [x-cloak] { display: none !important; }
         </style>
     </head>
-    <body class="font-poppins antialiased bg-gray-50">
+    <body class="font-poppins antialiased bg-gray-50" x-data="loginPage()" x-init="init()">
         <!-- Navigation -->
         <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-md shadow-lg">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -230,12 +210,13 @@
                                     </label>
                                     <div class="relative">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <i class="fas fa-user text-gray-400"></i>
+                                            <i class="fas" :class="inputIcon"></i>
                                         </div>
                                         <input type="text" id="email" name="email" value="{{ old('email') }}" 
                                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg form-input-custom focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                required autofocus autocomplete="username"
-                                               placeholder="Masukkan email atau NIK">
+                                               placeholder="Masukkan email atau NIK"
+                                               x-on:input="detectInputType($event.target.value)">
                                     </div>
                                     <p class="mt-1 text-xs text-gray-500">Anda bisa login menggunakan email atau NIK yang terdaftar</p>
                                 </div>
@@ -256,13 +237,13 @@
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                             <i class="fas fa-lock text-gray-400"></i>
                                         </div>
-                                        <input type="password" id="password" name="password"
+                                        <input :type="showPassword ? 'text' : 'password'" id="password" name="password"
                                                class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg form-input-custom focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                required autocomplete="current-password"
                                                placeholder="Masukkan password">
-                                        <button type="button" onclick="togglePassword()" 
+                                        <button type="button" x-on:click="showPassword = !showPassword" 
                                                 class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
-                                            <i class="fas fa-eye" id="toggle-icon"></i>
+                                            <i class="fas" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -278,7 +259,7 @@
                                     </div>
                                     
                                     <!-- Quick Login Demo -->
-                                    <button type="button" onclick="fillDemoCredentials()"
+                                    <button type="button" x-on:click="fillDemoCredentials()"
                                             class="text-sm text-purple-600 hover:text-purple-800 font-medium">
                                         <i class="fas fa-magic mr-1"></i>Coba Demo
                                     </button>
@@ -303,12 +284,12 @@
                                 <!-- Social Login (Optional) -->
                                 <div class="grid grid-cols-2 gap-4">
                                     <button type="button"
-                                            class="flex items-center justify-center gap-3 p-3 border border-gray-300 rounded-lg social-login-btn hover:border-blue-500 hover:bg-blue-50">
+                                            class="flex items-center justify-center gap-3 p-3 border border-gray-300 rounded-lg social-login-btn hover:border-blue-500 hover:bg-blue-50 transition duration-200">
                                         <i class="fab fa-google text-red-500"></i>
                                         <span class="font-medium text-gray-700">Google</span>
                                     </button>
                                     <button type="button"
-                                            class="flex items-center justify-center gap-3 p-3 border border-gray-300 rounded-lg social-login-btn hover:border-blue-600 hover:bg-blue-50">
+                                            class="flex items-center justify-center gap-3 p-3 border border-gray-300 rounded-lg social-login-btn hover:border-blue-600 hover:bg-blue-50 transition duration-200">
                                         <i class="fab fa-facebook text-blue-600"></i>
                                         <span class="font-medium text-gray-700">Facebook</span>
                                     </button>
@@ -336,108 +317,71 @@
             </div>
         </main>
 
-        <!-- Footer (Included from Layout) -->
+        <!-- Footer -->
         @include('layouts.footer')
 
-        <!-- JavaScript -->
+        <!-- JavaScript Clean -->
         <script>
-            // Navbar background on scroll
-            window.addEventListener('scroll', function() {
-                const nav = document.querySelector('nav');
-                if (window.scrollY > 50) {
-                    nav.classList.add('bg-white', 'shadow-lg');
-                    nav.classList.remove('bg-white/90');
-                } else {
-                    nav.classList.remove('bg-white', 'shadow-lg');
-                    nav.classList.add('bg-white/90');
+            function loginPage() {
+                return {
+                    showPassword: false,
+                    inputIcon: 'fa-user',
+                    showDemoAlert: false,
+                    showWelcomeAlert: window.location.search.includes('registered=true'),
+
+                    init() {
+                        this.initNavbarScroll();
+                        this.initEnterKey();
+                    },
+
+                    detectInputType(value) {
+                        const isEmail = value.includes('@');
+                        const isNIK = /^\d+$/.test(value);
+                        
+                        if (isEmail) {
+                            this.inputIcon = 'fa-envelope';
+                            document.getElementById('email').type = 'email';
+                        } else if (isNIK) {
+                            this.inputIcon = 'fa-id-card';
+                            document.getElementById('email').type = 'text';
+                        } else {
+                            this.inputIcon = 'fa-user';
+                            document.getElementById('email').type = 'text';
+                        }
+                    },
+
+                    fillDemoCredentials() {
+                        document.getElementById('email').value = 'demo@kelurahandigital.id';
+                        document.getElementById('password').value = 'demopassword123';
+                        
+                        this.showDemoAlert = true;
+                        this.inputIcon = 'fa-envelope';
+                        
+                        // Auto hide alert after 5 seconds
+                        setTimeout(() => {
+                            this.showDemoAlert = false;
+                        }, 5000);
+                    },
+
+                    initNavbarScroll() {
+                        window.addEventListener('scroll', () => {
+                            const nav = document.querySelector('nav');
+                            nav.classList.toggle('bg-white', window.scrollY > 50);
+                            nav.classList.toggle('shadow-lg', window.scrollY > 50);
+                            nav.classList.toggle('bg-white/90', window.scrollY <= 50);
+                        });
+                    },
+
+                    initEnterKey() {
+                        document.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter' && !e.target.matches('textarea, button, a')) {
+                                e.preventDefault();
+                                const submitBtn = document.querySelector('button[type="submit"]');
+                                if (submitBtn) submitBtn.click();
+                            }
+                        });
+                    }
                 }
-            });
-
-            // Toggle password visibility
-            function togglePassword() {
-                const passwordInput = document.getElementById('password');
-                const toggleIcon = document.getElementById('toggle-icon');
-                
-                if (passwordInput.type === 'password') {
-                    passwordInput.type = 'text';
-                    toggleIcon.classList.remove('fa-eye');
-                    toggleIcon.classList.add('fa-eye-slash');
-                } else {
-                    passwordInput.type = 'password';
-                    toggleIcon.classList.remove('fa-eye-slash');
-                    toggleIcon.classList.add('fa-eye');
-                }
-            }
-
-            // Fill demo credentials (for testing/demo purposes)
-            function fillDemoCredentials() {
-                document.getElementById('email').value = 'demo@kelurahandigital.id';
-                document.getElementById('password').value = 'demopassword123';
-                
-                // Show success message
-                const demoAlert = document.createElement('div');
-                demoAlert.className = 'mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700';
-                demoAlert.innerHTML = `
-                    <div class="flex items-center">
-                        <i class="fas fa-info-circle mr-2"></i>
-                        <span>Kredensial demo telah diisi. Anda bisa login untuk mencoba fitur demo.</span>
-                    </div>
-                `;
-                
-                const form = document.querySelector('form');
-                form.insertBefore(demoAlert, form.querySelector('button[type="submit"]'));
-                
-                // Auto remove after 5 seconds
-                setTimeout(() => {
-                    demoAlert.remove();
-                }, 5000);
-            }
-
-            // Auto detect if input is email or NIK
-            document.getElementById('email').addEventListener('input', function(e) {
-                const value = e.target.value;
-                const isEmail = value.includes('@');
-                const icon = this.parentNode.querySelector('.fa-user');
-                
-                if (isEmail) {
-                    icon.classList.remove('fa-user', 'fa-id-card');
-                    icon.classList.add('fa-envelope');
-                    this.type = 'email';
-                } else if (/^\d+$/.test(value)) {
-                    icon.classList.remove('fa-user', 'fa-envelope');
-                    icon.classList.add('fa-id-card');
-                    this.type = 'text';
-                } else {
-                    icon.classList.remove('fa-id-card', 'fa-envelope');
-                    icon.classList.add('fa-user');
-                    this.type = 'text';
-                }
-            });
-
-            // Enter key to submit
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && !e.target.matches('textarea, button, a')) {
-                    e.preventDefault();
-                    document.querySelector('button[type="submit"]').click();
-                }
-            });
-
-            // Show welcome back message if returning from registration
-            if (window.location.search.includes('registered=true')) {
-                const welcomeAlert = document.createElement('div');
-                welcomeAlert.className = 'mb-6 p-4 bg-green-50 border border-green-200 rounded-xl animate-pulse';
-                welcomeAlert.innerHTML = `
-                    <div class="flex items-center">
-                        <i class="fas fa-party-horn text-green-500 mr-3"></i>
-                        <div>
-                            <span class="font-bold text-green-700">Selamat! Akun Anda berhasil dibuat.</span>
-                            <p class="text-green-600 text-sm mt-1">Silakan login dengan email dan password yang telah Anda buat.</p>
-                        </div>
-                    </div>
-                `;
-                
-                const form = document.querySelector('form');
-                form.insertBefore(welcomeAlert, form.firstChild);
             }
         </script>
     </body>

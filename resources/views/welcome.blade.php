@@ -1,5 +1,8 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" 
+      x-data="modalState()"
+      x-on:keydown.escape.window="closeModal()"
+      :class="{ 'overflow-hidden': modalOpen }">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,6 +19,7 @@
         
         <!-- Additional Styles -->
         <script src="https://cdn.tailwindcss.com"></script>
+        
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
             
@@ -56,6 +60,14 @@
                 font-feature-settings: "tnum";
                 font-variant-numeric: tabular-nums;
             }
+            
+            /* Modal z-index untuk welcome page */
+            .modal-overlay {
+                z-index: 9997 !important;
+            }
+            
+            /* Pastikan modal tampil di atas semua konten */
+            [x-cloak] { display: none !important; }
         </style>
     </head>
     <body class="font-poppins antialiased">
@@ -254,19 +266,23 @@
                         <p class="text-gray-600 mb-6">
                             Lacak status pengaduan atau surat Anda tanpa perlu login menggunakan kode unik.
                         </p>
-                        <div class="bg-gray-50 rounded-xl p-4 mb-6">
-                            <p class="text-sm text-gray-600 mb-3">Masukkan kode tracking:</p>
-                            <div class="flex">
-                                <input type="text" placeholder="Contoh: PGN-2024-001" class="flex-1 px-4 py-3 rounded-l-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <button class="bg-blue-600 text-white px-6 py-3 rounded-r-lg hover:bg-blue-700 transition-colors">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <a href="{{ route('tracking.pengaduan', 'demo') }}" class="inline-flex items-center text-green-600 font-semibold hover:text-green-800">
-                            Coba Demo <i class="fas fa-external-link-alt ml-2"></i>
+                        <ul class="space-y-3 mb-8">
+                            <li class="flex items-center text-gray-700">
+                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                                Kode tracking unik
+                            </li>
+                            <li class="flex items-center text-gray-700">
+                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                                Update status otomatis
+                            </li>
+                            <li class="flex items-center text-gray-700">
+                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                                Akses sekarang
+                            </li>
+                        </ul>
+                        <a href="{{ route('login') }}" class="inline-flex items-center text-purple-600 font-semibold hover:text-purple-800">
+                            Lacak Sekarang <i class="fas fa-arrow-right ml-2"></i>
                         </a>
-                    </div>
                 </div>
             </div>
         </section>
@@ -330,70 +346,125 @@
             </div>
         </section>
 
+        <!-- Footer dengan modal -->
         @include('layouts.footer')
 
-        <!-- JavaScript for Interactive Elements -->
+        <!-- JavaScript Clean -->
         <script>
-            // Counter Animation
-            document.addEventListener('DOMContentLoaded', function() {
-                // Stats Counter
-                const counters = document.querySelectorAll('.stats-counter');
-                counters.forEach(counter => {
-                    const target = parseInt(counter.getAttribute('data-count'));
-                    const increment = target / 100;
-                    let current = 0;
+            // Alpine.js Modal State
+            function modalState() {
+                return {
+                    modalOpen: false,
+                    activeModal: null,
                     
-                    const updateCounter = () => {
-                        if (current < target) {
-                            current += increment;
-                            counter.innerText = Math.ceil(current).toLocaleString();
-                            setTimeout(updateCounter, 30);
-                        } else {
-                            counter.innerText = target.toLocaleString();
-                        }
-                    };
+                    showModal(modalId) {
+                        this.activeModal = modalId;
+                        this.modalOpen = true;
+                        document.body.style.overflow = 'hidden';
+                    },
                     
-                    // Start counter when in viewport
+                    closeModal() {
+                        this.activeModal = null;
+                        this.modalOpen = false;
+                        document.body.style.overflow = 'auto';
+                    }
+                }
+            }
+
+            // Animation Utilities
+            class WelcomeAnimations {
+                constructor() {
+                    this.init();
+                }
+
+                init() {
+                    this.initCounters();
+                    this.initSmoothScroll();
+                    this.initNavbarScroll();
+                    this.initBackToTop();
+                }
+
+                initCounters() {
+                    const counters = document.querySelectorAll('.stats-counter');
                     const observer = new IntersectionObserver((entries) => {
                         entries.forEach(entry => {
                             if (entry.isIntersecting) {
-                                updateCounter();
+                                this.animateCounter(entry.target);
                                 observer.unobserve(entry.target);
                             }
                         });
-                    });
-                    
-                    observer.observe(counter);
-                });
+                    }, { threshold: 0.5 });
 
-                // Smooth scrolling for anchor links
-                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                    anchor.addEventListener('click', function (e) {
-                        e.preventDefault();
-                        const targetId = this.getAttribute('href');
-                        if(targetId === '#') return;
-                        
-                        const targetElement = document.querySelector(targetId);
-                        if(targetElement) {
-                            window.scrollTo({
-                                top: targetElement.offsetTop - 80,
-                                behavior: 'smooth'
-                            });
-                        }
-                    });
-                });
-            });
-
-            // Navbar background on scroll
-            window.addEventListener('scroll', function() {
-                const nav = document.querySelector('nav');
-                if (window.scrollY > 50) {
-                    nav.classList.add('bg-white', 'shadow-lg');
-                    nav.classList.remove('bg-white/90');
-                } else {
-                    nav.classList.remove('bg-white', 'shadow-lg');
-                    nav.classList.add('bg-white/90');
+                    counters.forEach(counter => observer.observe(counter));
                 }
+
+                animateCounter(element) {
+                    const target = parseInt(element.getAttribute('data-count'));
+                    const increment = target / 50;
+                    let current = 0;
+
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= target) {
+                            element.textContent = target.toLocaleString();
+                            clearInterval(timer);
+                        } else {
+                            element.textContent = Math.ceil(current).toLocaleString();
+                        }
+                    }, 30);
+                }
+
+                initSmoothScroll() {
+                    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                        anchor.addEventListener('click', (e) => {
+                            const href = anchor.getAttribute('href');
+                            if (href === '#') return;
+                            
+                            e.preventDefault();
+                            const target = document.querySelector(href);
+                            if (target) {
+                                window.scrollTo({
+                                    top: target.offsetTop - 80,
+                                    behavior: 'smooth'
+                                });
+                            }
+                        });
+                    });
+                }
+
+                initNavbarScroll() {
+                    const nav = document.querySelector('nav');
+                    window.addEventListener('scroll', () => {
+                        nav.classList.toggle('bg-white', window.scrollY > 50);
+                        nav.classList.toggle('shadow-lg', window.scrollY > 50);
+                        nav.classList.toggle('bg-white/90', window.scrollY <= 50);
+                    });
+                }
+
+                initBackToTop() {
+                    const button = document.createElement('button');
+                    button.innerHTML = '<i class="fas fa-chevron-up"></i>';
+                    button.className = 'fixed bottom-6 right-6 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-200 opacity-0 invisible z-40';
+                    button.setAttribute('aria-label', 'Kembali ke atas');
+                    button.id = 'backToTop';
+                    document.body.appendChild(button);
+
+                    window.addEventListener('scroll', () => {
+                        button.classList.toggle('opacity-0', window.scrollY <= 300);
+                        button.classList.toggle('invisible', window.scrollY <= 300);
+                        button.classList.toggle('opacity-100', window.scrollY > 300);
+                        button.classList.toggle('visible', window.scrollY > 300);
+                    });
+
+                    button.addEventListener('click', () => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                }
+            }
+
+            // Initialize when DOM is loaded
+            document.addEventListener('DOMContentLoaded', () => {
+                new WelcomeAnimations();
             });
         </script>
     </body>
