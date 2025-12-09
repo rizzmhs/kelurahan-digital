@@ -122,14 +122,6 @@ class JenisSuratController extends Controller
 
     public function previewTemplate(JenisSurat $jenisSurat)
     {
-        // Available templates
-        $availableTemplates = ['default', 'sktm', 'domisili', 'usaha'];
-        
-        // Jika template tidak valid, gunakan default
-        if (!in_array($jenisSurat->template, $availableTemplates)) {
-            $jenisSurat->template = 'default';
-        }
-
         // Data dummy untuk preview
         $dummyData = $this->getDummyData($jenisSurat);
 
@@ -229,9 +221,10 @@ class JenisSuratController extends Controller
      */
     private function getTemplateViewPaths(string $templateName): array
     {
+        // Periksa di lokasi surat.templates terlebih dahulu (tempat template baru saya buat)
         return [
-            'admin.jenis-surat.templates.' . $templateName,
             'surat.templates.' . $templateName,
+            'admin.jenis-surat.templates.' . $templateName,
             'templates.' . $templateName,
             'admin.templates.' . $templateName,
         ];
@@ -244,12 +237,32 @@ class JenisSuratController extends Controller
     {
         $dummyData = $this->getDummyData($jenisSurat);
         
-        return view('admin.jenis-surat.template-fallback', [
+        // Get all template files yang tersedia di resources/views/surat/templates/
+        $templatePath = resource_path('views/surat/templates');
+        $availableTemplates = [];
+        if (is_dir($templatePath)) {
+            $files = glob($templatePath . '/*.blade.php');
+            $availableTemplates = array_map(function($file) {
+                return basename($file, '.blade.php');
+            }, $files);
+        }
+        
+        // Try to render a generic preview dengan data dummy
+        return view('admin.jenis-surat.template-preview', [
             'jenisSurat' => $jenisSurat,
             'dummyData' => $dummyData,
             'templateName' => $jenisSurat->template,
-            'availableTemplates' => ['default', 'sktm', 'domisili', 'usaha'],
+            'availableTemplates' => $availableTemplates ?: ['default', 'sktm', 'domisili', 'usaha'],
             'viewPaths' => $this->getTemplateViewPaths($jenisSurat->template),
+            'surat' => (object) [
+                'nomor_surat' => 'XXX/YYYY/ZZZZ',
+                'tanggal_surat' => now()->format('d-m-Y'),
+                'perihal' => 'Surat ' . $jenisSurat->nama,
+                'kode_surat' => $jenisSurat->kode,
+            ],
+            'user' => (object) $dummyData,
+            'data' => $dummyData,
+            'tanggal' => now()->format('d F Y'),
         ]);
     }
 }

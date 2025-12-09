@@ -10,6 +10,12 @@
             <!-- Filters -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6 bg-white border-b border-gray-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Filter & Pencarian</h3>
+                        <a href="{{ route('admin.surat.quick.create') }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            + Buat Surat Cepat
+                        </a>
+                    </div>
                     <form method="GET" action="{{ route('admin.surat.index') }}">
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <!-- Status Filter -->

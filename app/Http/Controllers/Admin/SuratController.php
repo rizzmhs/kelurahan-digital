@@ -229,4 +229,91 @@ class SuratController extends Controller
         return redirect()->route('admin.surat.index')
             ->with('success', 'Surat berhasil dihapus.');
     }
+
+    // Quick create form for admin to create surat faster with dynamic form
+    public function createQuick()
+    {
+        $jenisSurat = JenisSurat::active()->get();
+        $users = User::warga()->verified()->active()->get();
+
+        return view('admin.surat.quick-create', compact('jenisSurat', 'users'));
+    }
+
+    // Store quick-created surat with file handling
+    public function storeQuick(Request $request)
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'jenis_surat_id' => 'required|exists:jenis_surat,id',
+            'generate_pdf' => 'nullable|boolean',
+            'data.*' => 'nullable',
+            'file.*' => 'nullable|file|max:5120',
+        ]);
+
+        $user = User::findOrFail($validated['user_id']);
+        $jenisSurat = JenisSurat::findOrFail($validated['jenis_surat_id']);
+
+        // Parse data dari request
+        $data = [];
+        $filePaths = [];
+
+        if ($request->has('data')) {
+            foreach ($request->input('data', []) as $key => $value) {
+                if (!empty($value)) {
+                    $data[$key] = $value;
+                }
+            }
+        }
+
+        // Handle file uploads
+        if ($request->hasAny('file')) {
+            foreach ($request->file('file', []) as $key => $file) {
+                if ($file) {
+                    $path = $file->store("surat/persyaratan/{$jenisSurat->kode}", 'public');
+                    $filePaths[$key] = $path;
+                }
+            }
+        }
+
+        // Merge file paths dengan data
+        $data = array_merge($data, $filePaths);
+
+        // Generate nomor surat
+        $timestamp = now()->format('Ymd');
+        $random = strtoupper(substr(md5(time()), 0, 6));
+        $nomor = "{$jenisSurat->kode}/{$timestamp}/{$random}";
+
+        // Create surat record
+        $surat = Surat::create([
+            'nomor_surat' => $nomor,
+            'user_id' => $user->id,
+            'jenis_surat_id' => $jenisSurat->id,
+            'data_pengajuan' => $data,
+            'status' => 'diproses',
+        ]);
+
+        // Create riwayat
+        RiwayatSurat::create([
+            'surat_id' => $surat->id,
+            'status' => 'diproses',
+            'catatan' => 'Surat dibuat oleh admin melalui quick-create.',
+            'user_id' => auth()->id(),
+        ]);
+
+        // Optionally generate PDF
+        if (!empty($validated['generate_pdf'])) {
+            $this->generatePdf($request, $surat);
+            $surat->update(['status' => 'siap_ambil']);
+
+            RiwayatSurat::create([
+                'surat_id' => $surat->id,
+                'status' => 'siap_ambil',
+                'catatan' => 'PDF digenerate otomatis oleh admin.',
+                'user_id' => auth()->id(),
+            ]);
+        }
+
+        return redirect()->route('admin.surat.show', $surat)
+            ->with('success', 'Surat berhasil dibuat.');
+    }
 }

@@ -76,6 +76,7 @@
                                 <!-- Status Update -->
                                 <form action="{{ route('admin.surat.update.status', $surat) }}" method="POST" class="mb-4">
                                     @csrf
+                                    @method('PUT')
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label for="status" class="block text-sm font-medium text-gray-700">Ubah Status</label>

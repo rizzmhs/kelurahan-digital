@@ -57,6 +57,7 @@
                                 <!-- Status Update -->
                                 <form action="{{ route('admin.pengaduan.update.status', $pengaduan) }}" method="POST" class="mb-4">
                                     @csrf
+                                    @method('PUT')
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label for="status" class="block text-sm font-medium text-gray-700">Ubah Status</label>
@@ -97,6 +98,7 @@
                                 @if(in_array($pengaduan->status, ['diverifikasi', 'diproses']))
                                 <form action="{{ route('admin.pengaduan.assign.petugas', $pengaduan) }}" method="POST" class="mb-4">
                                     @csrf
+                                    @method('PUT')
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label for="petugas_id" class="block text-sm font-medium text-gray-700">Assign Petugas</label>

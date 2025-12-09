@@ -200,6 +200,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
 
     // SURAT ADMIN
     Route::prefix('surat')->name('surat.')->group(function () {
+        // Quick create routes
+        Route::get('/quick-create', [AdminSuratController::class, 'createQuick'])->name('quick.create');
+        Route::post('/quick-create', [AdminSuratController::class, 'storeQuick'])->name('quick.store');
+
         Route::get('/', [AdminSuratController::class, 'index'])->name('index');
         Route::get('/{surat}', [AdminSuratController::class, 'show'])->name('show');
         Route::put('/{surat}/status', [AdminSuratController::class, 'updateStatus'])->name('update.status');
