@@ -75,7 +75,7 @@
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-500">Total Surat</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $surats->total() }}</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $stats['total'] ?? $surats->total() }}</p>
                         </div>
                     </div>
                 </div>
@@ -87,7 +87,7 @@
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-500">Diajukan</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $surats->where('status', 'diajukan')->count() }}</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $stats['diajukan'] ?? $surats->where('status', 'diajukan')->count() }}</p>
                         </div>
                     </div>
                 </div>
@@ -99,7 +99,7 @@
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-500">Diproses</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $surats->where('status', 'diproses')->count() }}</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $stats['diproses'] ?? $surats->where('status', 'diproses')->count() }}</p>
                         </div>
                     </div>
                 </div>
@@ -111,7 +111,7 @@
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-500">Siap Ambil</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $surats->where('status', 'siap_ambil')->count() }}</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $stats['siap_ambil'] ?? $surats->where('status', 'siap_ambil')->count() }}</p>
                         </div>
                     </div>
                 </div>
@@ -123,7 +123,7 @@
                         </div>
                         <div class="ml-4">
                             <p class="text-sm font-medium text-gray-500">Selesai</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $surats->where('status', 'selesai')->count() }}</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $stats['selesai'] ?? $surats->where('status', 'selesai')->count() }}</p>
                         </div>
                     </div>
                 </div>
@@ -168,6 +168,9 @@
                                         Status
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Petugas
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Tanggal Pengajuan
                                     </th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -192,13 +195,28 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                {{ $surat->status == 'diajukan' ? 'bg-yellow-100 text-yellow-800' : '' }}
-                                                {{ $surat->status == 'diproses' ? 'bg-purple-100 text-purple-800' : '' }}
-                                                {{ $surat->status == 'siap_ambil' ? 'bg-green-100 text-green-800' : '' }}
-                                                {{ $surat->status == 'selesai' ? 'bg-gray-100 text-gray-800' : '' }}
-                                                {{ $surat->status == 'ditolak' ? 'bg-red-100 text-red-800' : '' }}">
+                                                @if($surat->status == 'draft') bg-gray-100 text-gray-800
+                                                @elseif($surat->status == 'diajukan') bg-yellow-100 text-yellow-800
+                                                @elseif($surat->status == 'diproses') bg-purple-100 text-purple-800
+                                                @elseif($surat->status == 'siap_ambil') bg-green-100 text-green-800
+                                                @elseif($surat->status == 'selesai') bg-gray-100 text-gray-800
+                                                @elseif($surat->status == 'ditolak') bg-red-100 text-red-800
+                                                @endif">
                                                 {{ $statuses[$surat->status] ?? $surat->status }}
                                             </span>
+                                            @if($surat->tanggal_verifikasi)
+                                                <div class="text-xs text-gray-500 mt-1">
+                                                    <i class="fas fa-check-circle text-green-500 mr-1"></i>
+                                                    Tervifikasi: {{ $surat->tanggal_verifikasi->format('d/m/Y') }}
+                                                </div>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @if($surat->petugas)
+                                                <div class="text-sm text-gray-900">{{ $surat->petugas->name }}</div>
+                                            @else
+                                                <span class="text-sm text-gray-500">Belum ditugaskan</span>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {{ $surat->created_at->format('d/m/Y H:i') }}
@@ -211,26 +229,46 @@
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                                 
-                                                @if($surat->status == 'diajukan')
+                                                @if($surat->status == 'diajukan' && auth()->user()->dapatMemprosesSurat())
                                                     <form action="{{ route('petugas.surat.proses', $surat) }}" method="POST" class="inline">
                                                         @csrf
+                                                        @method('PUT')
                                                         <button type="submit" 
                                                                 class="text-purple-600 hover:text-purple-900 p-1 rounded hover:bg-purple-50" 
-                                                                title="Proses Surat"
-                                                                onclick="return confirm('Apakah Anda yakin ingin memproses surat ini?')">
-                                                            <i class="fas fa-cog"></i>
+                                                                title="Ambil Surat untuk Diproses"
+                                                                onclick="return confirm('Apakah Anda yakin ingin mengambil surat ini untuk diproses?')">
+                                                            <i class="fas fa-hand-paper"></i>
                                                         </button>
                                                     </form>
                                                 @endif
 
-                                                @if($surat->status == 'diproses')
-                                                    <form action="{{ route('petugas.surat.generate.pdf', $surat) }}" method="POST" class="inline">
+                                                @if($surat->status == 'diproses' && $surat->petugas_id == auth()->id())
+                                                    <a href="{{ route('petugas.surat.edit', $surat) }}" 
+                                                       class="text-yellow-600 hover:text-yellow-900 p-1 rounded hover:bg-yellow-50"
+                                                       title="Proses Surat">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    
+                                                    <form action="{{ route('petugas.surat.generate', $surat) }}" method="POST" class="inline">
                                                         @csrf
                                                         <button type="submit" 
                                                                 class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50" 
-                                                                title="Generate PDF"
-                                                                onclick="return confirm('Apakah Anda yakin ingin generate PDF surat ini?')">
+                                                                title="Generate Surat"
+                                                                onclick="return confirm('Apakah Anda yakin ingin generate surat ini?')">
                                                             <i class="fas fa-file-pdf"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
+
+                                                @if($surat->status == 'siap_ambil' && $surat->petugas_id == auth()->id())
+                                                    <form action="{{ route('petugas.surat.selesai', $surat) }}" method="POST" class="inline">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <button type="submit" 
+                                                                class="text-gray-600 hover:text-gray-900 p-1 rounded hover:bg-gray-50" 
+                                                                title="Tandai Selesai"
+                                                                onclick="return confirm('Apakah Anda yakin ingin menandai surat ini sebagai selesai?')">
+                                                            <i class="fas fa-check-double"></i>
                                                         </button>
                                                     </form>
                                                 @endif
@@ -248,6 +286,19 @@
                                                         <i class="fas fa-download"></i>
                                                     </a>
                                                 @endif
+
+                                                @if(in_array($surat->status, ['diajukan', 'diproses']) && auth()->user()->isAdmin())
+                                                    <form action="{{ route('petugas.surat.tolak', $surat) }}" method="POST" class="inline">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <button type="submit" 
+                                                                class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50" 
+                                                                title="Tolak Surat"
+                                                                onclick="return confirm('Apakah Anda yakin ingin menolak surat ini?')">
+                                                            <i class="fas fa-times-circle"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>
@@ -258,7 +309,7 @@
 
                     <!-- Pagination -->
                     <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-                        {{ $surats->links() }}
+                        {{ $surats->appends(request()->query())->links() }}
                     </div>
                 @else
                     <div class="text-center py-12">
@@ -294,6 +345,27 @@
                     setTimeout(() => alert.remove(), 500);
                 });
             }, 5000);
+        });
+
+        // Confirm sebelum tolak surat
+        document.addEventListener('submit', function(e) {
+            if (e.target.closest('form[action*="tolak"]')) {
+                e.preventDefault();
+                if (confirm('Apakah Anda yakin ingin menolak surat ini? Pastikan sudah memberikan alasan penolakan.')) {
+                    const alasan = prompt('Masukkan alasan penolakan:');
+                    if (alasan && alasan.trim() !== '') {
+                        const form = e.target.closest('form');
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'alasan_penolakan';
+                        input.value = alasan;
+                        form.appendChild(input);
+                        form.submit();
+                    } else {
+                        alert('Alasan penolakan harus diisi!');
+                    }
+                }
+            }
         });
     </script>
     @endpush

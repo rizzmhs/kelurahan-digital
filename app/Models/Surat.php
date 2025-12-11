@@ -14,26 +14,38 @@ class Surat extends Model
     protected $fillable = [
         'nomor_surat',
         'user_id',
+        'petugas_id', // ✅ TAMBAHKAN INI
         'jenis_surat_id', 
         'data_pengajuan',
+        'file_persyaratan', // ✅ TAMBAHKAN INI (dari migration)
         'status',
         'file_surat',
-        'keterangan',
-        'tanggal_verifikasi',
-        'verifikator_id',
-        'petugas_id', // ✅ TAMBAHKAN JIKA ADA
-        'tanggal_proses', // ✅ TAMBAHKAN JIKA ADA
-        'tanggal_siap', // ✅ TAMBAHKAN JIKA ADA  
-        'tanggal_selesai', // ✅ TAMBAHKAN JIKA ADA
-        'alasan_penolakan', // ✅ TAMBAHKAN JIKA ADA
+        'catatan_admin', // ✅ GUNAKAN INI dari migration (bukan 'keterangan')
+        'custom_template', // ✅ TAMBAHKAN INI (dari migration)
+        'tanggal_verifikasi', // ✅ TAMBAHKAN JIKA ADA DI DATABASE
+        'verifikator_id', // ✅ TAMBAHKAN JIKA ADA DI DATABASE
+        'tanggal_proses', // ✅ TAMBAHKAN JIKA ADA DI DATABASE
+        'tanggal_siap', // ✅ TAMBAHKAN JIKA ADA DI DATABASE
+        'tanggal_selesai', // ✅ TAMBAHKAN JIKA ADA DI DATABASE
+        'alasan_penolakan', // ✅ TAMBAHKAN JIKA ADA DI DATABASE
+        // ✅ TAMBAHKAN 'diproses_pada' JIKA DITAMBAHKAN DI MIGRATION
+        'diproses_pada',
     ];
 
     protected $casts = [
         'data_pengajuan' => 'array',
+        'file_persyaratan' => 'array', // ✅ CAST SEBAGAI ARRAY
         'tanggal_verifikasi' => 'datetime',
-        'tanggal_proses' => 'datetime', // ✅ TAMBAHKAN
-        'tanggal_siap' => 'datetime', // ✅ TAMBAHKAN
-        'tanggal_selesai' => 'datetime', // ✅ TAMBAHKAN
+        'tanggal_proses' => 'datetime',
+        'tanggal_siap' => 'datetime',
+        'tanggal_selesai' => 'datetime',
+        'diproses_pada' => 'datetime', // ✅ TAMBAHKAN JIKA ADA
+    ];
+
+    protected $appends = [
+        'status_display',
+        'status_color',
+        'data_pengisian',
     ];
 
     // Relationships
@@ -57,7 +69,6 @@ class Surat extends Model
         return $this->belongsTo(User::class, 'petugas_id');
     }
 
-    // ✅ TAMBAHKAN RELATIONSHIP RIWAYAT
     public function riwayat()
     {
         return $this->hasMany(RiwayatSurat::class, 'surat_id');
@@ -74,7 +85,12 @@ class Surat extends Model
         return $query->where('user_id', $userId);
     }
 
-    // ✅ TAMBAHKAN SCOPE METHODS BARU
+    // ✅ PERBAIKI SCOPE METHODS UNTUK SEMUA STATUS
+    public function scopeDraft($query)
+    {
+        return $query->where('status', 'draft');
+    }
+
     public function scopeDiajukan($query)
     {
         return $query->where('status', 'diajukan');
@@ -105,10 +121,22 @@ class Surat extends Model
         return $query->where('petugas_id', $petugasId);
     }
 
-    // ✅ TAMBAHKAN HELPER METHODS
+    // ✅ TAMBAHKAN SCOPE LAINNYA
+    public function scopeBelumDiverifikasi($query)
+    {
+        return $query->whereNull('tanggal_verifikasi');
+    }
+
+    public function scopeSudahDiverifikasi($query)
+    {
+        return $query->whereNotNull('tanggal_verifikasi');
+    }
+
+    // Accessors
     public function getStatusDisplayAttribute()
     {
         $statuses = [
+            'draft' => 'Draft',
             'diajukan' => 'Diajukan',
             'diproses' => 'Diproses',
             'siap_ambil' => 'Siap Ambil',
@@ -122,24 +150,33 @@ class Surat extends Model
     public function getStatusColorAttribute()
     {
         $colors = [
+            'draft' => 'gray',
             'diajukan' => 'yellow',
-            'diproses' => 'purple', 
-            'siap_ambil' => 'green',
-            'selesai' => 'gray',
+            'diproses' => 'blue',
+            'siap_ambil' => 'purple',
+            'selesai' => 'green',
             'ditolak' => 'red'
         ];
 
         return $colors[$this->status] ?? 'gray';
     }
 
+    public function getDataPengisianAttribute()
+    {
+        return collect($this->data_pengajuan ?? [])->mapWithKeys(function ($value, $key) {
+            return [str_replace('_', ' ', $key) => $value];
+        });
+    }
+
+    // Helper methods
     public function canBeProcessed()
     {
-        return $this->status === 'diajukan';
+        return $this->status === 'diajukan' || $this->status === 'draft';
     }
 
     public function canGeneratePdf()
     {
-        return $this->status === 'diproses' && $this->file_surat === null;
+        return in_array($this->status, ['diproses', 'siap_ambil', 'selesai']) && $this->file_surat === null;
     }
 
     public function canBeCompleted()
@@ -157,7 +194,18 @@ class Surat extends Model
         return !is_null($this->file_surat);
     }
 
-    // ✅ TAMBAHKAN METHOD UNTUK GENERATE NOMOR SURAT
+    public function hasRequirementsFiles()
+    {
+        return !empty($this->file_persyaratan);
+    }
+
+    // ✅ TAMBAHKAN METHOD UNTUK CEK APAKAH SURAT MILIK USER
+    public function isOwnedBy($userId)
+    {
+        return $this->user_id == $userId;
+    }
+
+    // Static methods
     public static function generateNomorSurat($jenisSurat)
     {
         $prefix = 'S';
@@ -177,19 +225,12 @@ class Surat extends Model
         return "{$prefix}/{$jenisSurat}/{$year}/{$month}/" . str_pad($sequence, 3, '0', STR_PAD_LEFT);
     }
 
-    // ✅ TAMBAHKAN METHOD UNTUK DATA PENGISIAN SURAT
-    public function getDataPengisianAttribute()
-    {
-        return collect($this->data_pengajuan ?? [])->mapWithKeys(function ($value, $key) {
-            return [str_replace('_', ' ', $key) => $value];
-        });
-    }
-
-    // ✅ TAMBAHKAN METHOD UNTUK CEK APAKAH SURAT DAPAT DIPROSES
+    // ✅ PERBAIKI METHOD UNTUK ROLE CHECKING
     public function dapatDiprosesOleh($user)
     {
-        if ($user->isAdmin()) {
-            return true;
+        // Asumsi method isAdmin() dan isPetugas() ada di model User
+        if ($user->isAdmin() || $user->isVerifikator()) {
+            return in_array($this->status, ['draft', 'diajukan']);
         }
 
         if ($user->isPetugas()) {
@@ -197,5 +238,47 @@ class Surat extends Model
         }
 
         return false;
+    }
+
+    // ✅ TAMBAHKAN METHOD UNTUK UPDATE STATUS
+    public function updateStatus($status, $userId = null, $catatan = null)
+    {
+        $updates = ['status' => $status];
+        
+        switch ($status) {
+            case 'diajukan':
+                $updates['tanggal_verifikasi'] = now();
+                $updates['verifikator_id'] = $userId ?? auth()->id();
+                break;
+            case 'diproses':
+                $updates['petugas_id'] = $userId ?? auth()->id();
+                $updates['tanggal_proses'] = now();
+                $updates['diproses_pada'] = now();
+                break;
+            case 'siap_ambil':
+                $updates['tanggal_siap'] = now();
+                break;
+            case 'selesai':
+                $updates['tanggal_selesai'] = now();
+                break;
+            case 'ditolak':
+                $updates['alasan_penolakan'] = $catatan;
+                break;
+        }
+
+        if ($catatan && $status !== 'ditolak') {
+            $updates['catatan_admin'] = $catatan;
+        }
+
+        $this->update($updates);
+
+        // Buat riwayat
+        $this->riwayat()->create([
+            'user_id' => $userId ?? auth()->id(),
+            'status' => $status,
+            'catatan' => $catatan,
+        ]);
+
+        return $this;
     }
 }

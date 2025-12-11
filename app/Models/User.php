@@ -11,16 +11,21 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    // ✅ Sesuaikan dengan role yang ada di sistem: admin, petugas, warga
+    const ROLE_ADMIN = 'admin';
+    const ROLE_PETUGAS = 'petugas';
+    const ROLE_WARGA = 'warga';
+    
+    // Status user
+    const STATUS_ACTIVE = 'active';
+    const STATUS_INACTIVE = 'inactive';
+    const STATUS_SUSPENDED = 'suspended';
+
     protected $fillable = [
         'name',
         'email',
         'password',
-        'role',
+        'role', // ✅ Pastikan role ini hanya berisi: admin, petugas, warga
         'nik',
         'alamat',
         'telepon',
@@ -28,24 +33,17 @@ class User extends Authenticatable
         'jenis_kelamin',
         'foto_ktp',
         'is_verified',
-        'status'
+        'status',
+        'google_id',
+        'google_token',
+        'google_refresh_token',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -55,6 +53,15 @@ class User extends Authenticatable
             'is_verified' => 'boolean',
         ];
     }
+
+    protected $appends = [
+        'role_display',
+        'status_display',
+        'initials',
+        'is_admin',
+        'is_petugas',
+        'is_warga',
+    ];
 
     // Relationships
     public function pengaduans()
@@ -77,25 +84,43 @@ class User extends Authenticatable
         return $this->hasMany(RiwayatSurat::class);
     }
 
+    // Untuk surat yang ditugaskan ke petugas
+    public function suratTugas()
+    {
+        return $this->hasMany(Surat::class, 'petugas_id');
+    }
+
+    // ❌ HAPUS suratVerifikasi karena tidak ada role verifikator
+    // public function suratVerifikasi()
+    // {
+    //     return $this->hasMany(Surat::class, 'verifikator_id');
+    // }
+
     // Scope methods
     public function scopeWarga($query)
     {
-        return $query->where('role', 'warga');
+        return $query->where('role', self::ROLE_WARGA);
     }
 
     public function scopePetugas($query)
     {
-        return $query->where('role', 'petugas');
+        return $query->where('role', self::ROLE_PETUGAS);
     }
 
     public function scopeAdmin($query)
     {
-        return $query->where('role', 'admin');
+        return $query->where('role', self::ROLE_ADMIN);
     }
+
+    // ❌ HAPUS scopeVerifikator karena tidak ada role verifikator
+    // public function scopeVerifikator($query)
+    // {
+    //     return $query->where('role', 'verifikator');
+    // }
 
     public function scopeActive($query)
     {
-        return $query->where('status', 'active');
+        return $query->where('status', self::STATUS_ACTIVE);
     }
 
     public function scopeVerified($query)
@@ -103,7 +128,7 @@ class User extends Authenticatable
         return $query->where('is_verified', true);
     }
 
-    // Role methods - YANG INI YANG DITAMBAHKAN
+    // Role checking methods - SIMPLIFIED
     public function hasRole($role): bool
     {
         if (is_array($role)) {
@@ -118,25 +143,50 @@ class User extends Authenticatable
         return in_array($this->role, $roles);
     }
 
-    // Helper methods
+    // Helper methods - Lebih sederhana
     public function isWarga(): bool
     {
-        return $this->role === 'warga';
+        return $this->role === self::ROLE_WARGA;
     }
 
     public function isPetugas(): bool
     {
-        return $this->role === 'petugas';
+        return $this->role === self::ROLE_PETUGAS;
     }
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    // ❌ HAPUS karena tidak ada role verifikator
+    // public function isVerifikator(): bool
+    // {
+    //     return $this->role === 'verifikator';
+    // }
+
+    // Method untuk memeriksa kemampuan user
+    public function dapatMemverifikasi(): bool
+    {
+        // Hanya admin yang bisa memverifikasi
+        return $this->isAdmin();
+    }
+
+    public function dapatMemprosesSurat(): bool
+    {
+        // Admin dan petugas bisa memproses surat
+        return $this->isAdmin() || $this->isPetugas();
+    }
+
+    public function dapatMemprosesPengaduan(): bool
+    {
+        // Admin dan petugas bisa memproses pengaduan
+        return $this->isAdmin() || $this->isPetugas();
     }
 
     public function isActive(): bool
     {
-        return $this->status === 'active';
+        return $this->status === self::STATUS_ACTIVE;
     }
 
     public function isVerified(): bool
@@ -144,34 +194,44 @@ class User extends Authenticatable
         return $this->is_verified === true;
     }
 
-    // Permission methods (untuk compatibility)
+    // ❌ OPSIONAL: HAPUS permission system jika tidak diperlukan
+    // Karena Anda pakai role middleware sederhana
+    /*
     public function hasPermissionTo($permission): bool
     {
-        // Simple permission check based on role
+        // Jika ingin tetap pakai permission, sesuaikan dengan role yang ada
         $permissions = $this->getPermissions();
         return in_array($permission, $permissions);
     }
 
     public function getPermissions(): array
     {
+        // Sesuaikan dengan role yang ada
         $rolePermissions = [
-            'admin' => [
+            self::ROLE_ADMIN => [
                 'manage-users',
                 'manage-pengaduan', 
                 'manage-surat',
                 'manage-master-data',
                 'view-reports',
-                'export-data'
+                'export-data',
+                'verify-surat',
+                'assign-petugas',
+                'process-surat',
+                'generate-pdf'
             ],
-            'petugas' => [
+            self::ROLE_PETUGAS => [
                 'manage-pengaduan',
                 'manage-surat',
+                'process-surat',
+                'generate-pdf',
                 'view-reports'
             ],
-            'warga' => [
+            self::ROLE_WARGA => [
                 'create-pengaduan',
                 'create-surat',
-                'view-own-data'
+                'view-own-data',
+                'track-status'
             ]
         ];
 
@@ -182,12 +242,14 @@ class User extends Authenticatable
     {
         return collect($this->getPermissions());
     }
+    */
 
     public function getRoleNames()
     {
         return collect([$this->role]);
     }
 
+    // Attribute accessors
     public function getInitialsAttribute(): string
     {
         $names = explode(' ', $this->name);
@@ -200,26 +262,86 @@ class User extends Authenticatable
         return substr($initials, 0, 2);
     }
 
-    // Attribute accessors
     public function getRoleDisplayAttribute(): string
     {
         $roles = [
-            'admin' => 'Administrator',
-            'petugas' => 'Petugas',
-            'warga' => 'Warga'
+            self::ROLE_ADMIN => 'Administrator',
+            self::ROLE_PETUGAS => 'Petugas',
+            self::ROLE_WARGA => 'Warga'
         ];
 
-        return $roles[$this->role] ?? $this->role;
+        return $roles[$this->role] ?? ucfirst($this->role);
     }
 
     public function getStatusDisplayAttribute(): string
     {
         $statuses = [
-            'active' => 'Aktif',
-            'inactive' => 'Non-Aktif',
-            'suspended' => 'Ditangguhkan'
+            self::STATUS_ACTIVE => 'Aktif',
+            self::STATUS_INACTIVE => 'Non-Aktif',
+            self::STATUS_SUSPENDED => 'Ditangguhkan'
         ];
 
-        return $statuses[$this->status] ?? $this->status;
+        return $statuses[$this->status] ?? ucfirst($this->status);
+    }
+
+    // Helper attributes untuk template Blade
+    public function getIsAdminAttribute(): bool
+    {
+        return $this->isAdmin();
+    }
+
+    public function getIsPetugasAttribute(): bool
+    {
+        return $this->isPetugas();
+    }
+
+    public function getIsWargaAttribute(): bool
+    {
+        return $this->isWarga();
+    }
+
+    // Method untuk mendapatkan tugas
+    public function getSuratDapatDiproses()
+    {
+        if ($this->dapatMemprosesSurat()) {
+            return Surat::whereIn('status', ['diajukan', 'diproses'])
+                ->when($this->isPetugas(), function ($query) {
+                    // Petugas hanya melihat yang ditugaskan ke mereka atau belum ada petugas
+                    return $query->where(function($q) {
+                        $q->where('petugas_id', $this->id)
+                          ->orWhereNull('petugas_id');
+                    });
+                })
+                ->get();
+        }
+        
+        return collect();
+    }
+
+    public function getSuratDapatDiverifikasi()
+    {
+        if ($this->dapatMemverifikasi()) {
+            return Surat::where('status', 'diajukan')
+                ->get();
+        }
+        
+        return collect();
+    }
+    
+    // Method untuk mendapatkan pengaduan yang dapat diproses
+    public function getPengaduanDapatDiproses()
+    {
+        if ($this->dapatMemprosesPengaduan()) {
+            return Pengaduan::whereIn('status', ['diterima', 'diproses'])
+                ->when($this->isPetugas(), function ($query) {
+                    return $query->where(function($q) {
+                        $q->where('petugas_id', $this->id)
+                          ->orWhereNull('petugas_id');
+                    });
+                })
+                ->get();
+        }
+        
+        return collect();
     }
 }

@@ -121,11 +121,15 @@ Route::middleware(['auth', 'verified', 'role:warga'])->prefix('warga')->name('wa
         // Draft Routes
         Route::get('/draft/{jenis_surat}', [SuratController::class, 'createDraft'])->name('draft.create');
         Route::post('/draft/{jenis_surat}', [SuratController::class, 'storeDraft'])->name('draft.store');
+        
+        // ✅ TAMBAHKAN ROUTE UNTUK RIWAYAT DAN UPDATE STATUS WARGA
+        Route::get('/{surat}/riwayat', [SuratController::class, 'riwayat'])->name('riwayat');
+        Route::put('/{surat}/status', [SuratController::class, 'perbaruiStatus'])->name('update.status');
     });
 });
 
 // ==================== PETUGAS ROUTES ====================
-Route::middleware(['auth', 'verified', 'role:petugas,admin'])->prefix('petugas')->name('petugas.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:petugas'])->prefix('petugas')->name('petugas.')->group(function () {
     
     // Dashboard Petugas
     Route::get('/dashboard', [PetugasPengaduanController::class, 'dashboard'])->name('dashboard');
@@ -133,7 +137,7 @@ Route::middleware(['auth', 'verified', 'role:petugas,admin'])->prefix('petugas')
     // PENGADUAN PETUGAS
     Route::prefix('pengaduan')->name('pengaduan.')->group(function () {
         Route::get('/', [PetugasPengaduanController::class, 'index'])->name('index');
-        Route::get('/tugas-saya', [PetugasPengaduanController::class, 'tugasSaya'])->name('tugas-saya'); // ✅ SUDAH DITAMBAHKAN
+        Route::get('/tugas-saya', [PetugasPengaduanController::class, 'tugasSaya'])->name('tugas-saya');
         Route::get('/{pengaduan}', [PetugasPengaduanController::class, 'show'])->name('show');
         Route::put('/{pengaduan}/status', [PetugasPengaduanController::class, 'updateStatus'])->name('update.status');
         Route::put('/{pengaduan}/tindakan', [PetugasPengaduanController::class, 'updateTindakan'])->name('update.tindakan');
@@ -141,17 +145,25 @@ Route::middleware(['auth', 'verified', 'role:petugas,admin'])->prefix('petugas')
         Route::get('/{pengaduan}/riwayat', [PetugasPengaduanController::class, 'riwayat'])->name('riwayat');
     });
 
-    // SURAT PETUGAS
+    // SURAT PETUGAS - ✅ PERBAIKI BLOK INI
     Route::prefix('surat')->name('surat.')->group(function () {
         Route::get('/', [PetugasSuratController::class, 'index'])->name('index');
         Route::get('/{surat}', [PetugasSuratController::class, 'show'])->name('show');
+        Route::get('/{surat}/edit', [PetugasSuratController::class, 'edit'])->name('edit');
+        Route::put('/{surat}', [PetugasSuratController::class, 'update'])->name('update');
         Route::put('/{surat}/status', [PetugasSuratController::class, 'updateStatus'])->name('update.status');
-        Route::post('/{surat}/proses', [PetugasSuratController::class, 'prosesSurat'])->name('proses');
-        Route::get('/{surat}/preview', [PetugasSuratController::class, 'preview'])->name('preview');
-        Route::post('/{surat}/generate-pdf', [PetugasSuratController::class, 'generatePdf'])->name('generate.pdf');
-        Route::get('/{surat}/riwayat', [PetugasSuratController::class, 'riwayat'])->name('riwayat');
+        Route::put('/{surat}/proses', [PetugasSuratController::class, 'prosesSurat'])->name('proses');
         
-        // ✅ TAMBAHKAN ROUTE DOWNLOAD UNTUK PETUGAS
+        // ✅ TAMBAHKAN ROUTE BARU UNTUK SELESAI DAN TOLAK
+        Route::put('/{surat}/selesai', [PetugasSuratController::class, 'selesai'])->name('selesai');
+        Route::put('/{surat}/tolak', [PetugasSuratController::class, 'tolak'])->name('tolak');
+        
+        // ✅ TAMBAHKAN ROUTE UNTUK GENERATE
+        Route::post('/{surat}/generate', [PetugasSuratController::class, 'generate'])->name('generate');
+        Route::post('/{surat}/generate-pdf', [PetugasSuratController::class, 'generatePdf'])->name('generate.pdf');
+        
+        Route::get('/{surat}/preview', [PetugasSuratController::class, 'preview'])->name('preview');
+        Route::get('/{surat}/riwayat', [PetugasSuratController::class, 'riwayat'])->name('riwayat');
         Route::get('/{surat}/download', [PetugasSuratController::class, 'download'])->name('download');
     });
 });

@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        // Use ngrok redirect if enabled via .env (GOOGLE_USE_NGROK=true)
+        'redirect' => env('GOOGLE_USE_NGROK', false) ? env('GOOGLE_REDIRECT_URI_NGROK') : env('GOOGLE_REDIRECT_URI'),
+    ],
+
 ];
