@@ -129,13 +129,13 @@
                 <div class="flex justify-between items-center h-16 md:h-20">
                     <!-- Logo -->
                     <div class="flex items-center space-x-3">
-                        <a href="{{ url('/') }}" class="flex items-center space-x-3 no-underline">
-                            <div class="bg-gradient-to-br from-blue-600 to-purple-600 p-2 md:p-3 rounded-xl shadow-sm">
-                                <i class="fas fa-landmark text-white text-xl md:text-2xl"></i>
+                        <a href="{{ url('/') }}" class="flex items-center space-x-3">
+                            <div class="bg-gradient-to-br from-blue-600 to-purple-600 p-2 rounded-xl">
+                                <i class="fas fa-landmark text-white text-2xl"></i>
                             </div>
                             <div>
-                                <h1 class="text-lg md:text-xl font-bold text-gray-900">Kelurahan<span class="text-blue-600">Digital</span></h1>
-                                <p class="text-xs text-gray-500 hidden md:block">Sistem Layanan Terpadu</p>
+                                <h1 class="text-xl font-bold text-gray-900">Kelurahan<span class="text-yellow-300">Digital</span></h1>
+                                <p class="text-xs text-gray-500">Sistem Layanan Terpadu</p>
                             </div>
                         </a>
                     </div>
@@ -198,8 +198,7 @@
                                 </div>
                                 
                                 <h2 class="text-2xl md:text-3xl font-bold mb-6 leading-tight">
-                                    Selamat Datang Kembali di
-                                    <span class="text-yellow-300">KelurahanDigital</span>
+                                    Selamat Datang Kembali di Kelurahan<span class="text-yellow-300">Digital</span>
                                 </h2>
                                 
                                 <p class="text-base md:text-lg text-blue-100 mb-8 leading-relaxed">
@@ -433,39 +432,7 @@
             </div>
         </main>
 
-        <!-- Footer -->
-        <footer class="bg-white border-t border-gray-200 mt-12 md:mt-16">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
-                <div class="text-center">
-                    <div class="flex justify-center items-center space-x-2 mb-4">
-                        <div class="bg-gradient-to-br from-blue-600 to-purple-600 p-2 rounded-lg">
-                            <i class="fas fa-landmark text-white text-lg"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-bold text-gray-900">Kelurahan<span class="text-blue-600">Digital</span></h3>
-                            <p class="text-xs text-gray-500">Sistem Layanan Kelurahan Terpadu</p>
-                        </div>
-                    </div>
-                    <p class="text-sm text-gray-600 mb-4">
-                        © {{ date('Y') }} KelurahanDigital. Hak Cipta Dilindungi.
-                    </p>
-                    <div class="flex justify-center space-x-6">
-                        <a href="#" class="text-gray-400 hover:text-blue-600 transition-colors">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-pink-600 transition-colors">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-red-600 transition-colors">
-                            <i class="fab fa-youtube"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </footer>
+        @include('layouts.footer')
 
         <!-- JavaScript -->
         <script>

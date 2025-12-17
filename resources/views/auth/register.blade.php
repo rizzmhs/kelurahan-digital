@@ -112,13 +112,23 @@
                         </a>
                     </div>
 
-                    <!-- Navigation Links -->
+                    <!-- Navigation Links (Desktop) -->
                     <div class="hidden md:flex items-center space-x-8">
-                        <a href="{{ url('/') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-                            <i class="fas fa-home mr-2"></i>Beranda
+                        <a href="{{ url('/') }}#beranda" 
+                           class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                            Beranda
                         </a>
-                        <a href="{{ url('/#layanan') }}" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">
-                            <i class="fas fa-concierge-bell mr-2"></i>Layanan
+                        <a href="{{ url('/') }}#layanan" 
+                           class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                            Layanan
+                        </a>
+                        <a href="{{ url('/') }}#fitur" 
+                           class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                            Fitur
+                        </a>
+                        <a href="{{ url('/') }}#kontak" 
+                           class="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200">
+                            Kontak
                         </a>
                     </div>
 

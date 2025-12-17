@@ -22,6 +22,19 @@ class DashboardController extends Controller
             'total_surat' => Surat::count(),
             'surat_diproses' => Surat::whereIn('status', ['diajukan', 'diproses'])->count(),
             'surat_siap_ambil' => Surat::where('status', 'siap_ambil')->count(),
+
+            'warga_verified' => User::warga()->where('is_verified', true)->count(),
+        'petugas_active' => User::petugas()->where('status', 'active')->count(),
+        'pengaduan_pending' => Pengaduan::where('status', 'menunggu')->count(),
+        'surat_proses' => Surat::whereIn('status', ['diajukan', 'diproses'])->count(),
+        'today_pengaduan' => Pengaduan::whereDate('created_at', today())->count(),
+        'today_surat' => Surat::whereDate('created_at', today())->count(),
+        'today_users' => User::whereDate('created_at', today())->count(),
+        'today_completed' => Pengaduan::whereDate('updated_at', today())
+                                ->where('status', 'selesai')->count() +
+                            Surat::whereDate('updated_at', today())
+                                ->where('status', 'selesai')->count(),
+        'active_sessions' => 0,
         ];
 
         $recentPengaduan = Pengaduan::with('user')->latest()->limit(5)->get();

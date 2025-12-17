@@ -184,7 +184,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
         Route::post('/', [AdminUserController::class, 'store'])->name('store');
         Route::get('/{user}', [AdminUserController::class, 'show'])->name('show');
         Route::get('/{user}/edit', [AdminUserController::class, 'edit'])->name('edit');
-        Route::post('/{user}', [AdminUserController::class, 'update'])->name('update');
+        Route::put('/{user}', [AdminUserController::class, 'update'])->name('update');
         Route::delete('/{user}', [AdminUserController::class, 'destroy'])->name('destroy');
         Route::post('/{user}/verify', [AdminUserController::class, 'verify'])->name('verify');
         Route::post('/{user}/role', [AdminUserController::class, 'updateRole'])->name('update.role');

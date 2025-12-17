@@ -17,7 +17,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Custom Styles -->
+    <!-- Custom Styles for Consistency -->
     <style>
         :root {
             --primary-color: #3b82f6;
@@ -29,6 +29,7 @@
             font-family: 'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
         }
         
+        /* ===== NAVIGATION ===== */
         .nav-container {
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
         }
@@ -52,6 +53,7 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
         
+        /* ===== DROPDOWN ===== */
         .dropdown-wrapper {
             position: relative;
         }
@@ -110,11 +112,15 @@
             color: var(--primary-color);
         }
         
+        /* ===== BADGES ===== */
         .badge {
             font-size: 0.75rem;
-            padding: 0.125rem 0.5rem;
+            padding: 0.25rem 0.75rem;
             border-radius: 9999px;
             font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
         }
         
         .badge-admin {
@@ -132,6 +138,118 @@
             color: #059669;
         }
         
+        .badge-draft {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+        
+        .badge-diajukan {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        .badge-diproses {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+        
+        .badge-siap_ambil {
+            background: #dcfce7;
+            color: #059669;
+        }
+        
+        .badge-selesai {
+            background: #dcfce7;
+            color: #059669;
+        }
+        
+        .badge-ditolak {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .badge-menunggu {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        /* ===== CARDS ===== */
+        .card {
+            background: white;
+            border-radius: 0.75rem;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-hover:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+            transition: all 0.2s ease;
+        }
+        
+        .card-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .card-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+        
+        /* ===== STATS CARDS ===== */
+        .stats-card {
+            background: white;
+            border-radius: 0.75rem;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .stats-icon {
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .stats-icon-blue {
+            background: #eff6ff;
+            color: #3b82f6;
+        }
+        
+        .stats-icon-green {
+            background: #f0fdf4;
+            color: #22c55e;
+        }
+        
+        .stats-icon-purple {
+            background: #faf5ff;
+            color: #a855f7;
+        }
+        
+        .stats-icon-orange {
+            background: #fff7ed;
+            color: #f97316;
+        }
+        
+        .stats-icon-yellow {
+            background: #fefce8;
+            color: #eab308;
+        }
+        
+        /* ===== MOBILE MENU ===== */
         .mobile-menu {
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
         }
@@ -155,7 +273,61 @@
             background: rgba(255, 255, 255, 0.2);
         }
         
+        /* ===== BUTTONS ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        /* ===== UTILITIES ===== */
         [x-cloak] { display: none !important; }
+        
+        .page-header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        
+        .empty-state-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            border-radius: 9999px;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+        }
     </style>
     
     @stack('styles')
@@ -356,6 +528,7 @@
                                     <p class="text-sm text-gray-600 truncate">{{ Auth::user()->email }}</p>
                                     <p class="text-xs mt-2">
                                         <span class="badge {{ $roleBadgeClass }}">
+                                            <i class="fas fa-user-tag mr-1"></i>
                                             {{ $roleDisplayName }}
                                         </span>
                                     </p>
@@ -434,7 +607,8 @@
                             <p class="font-bold text-white">{{ Auth::user()->name }}</p>
                             <p class="text-sm text-blue-100">{{ Auth::user()->email }}</p>
                             <p class="text-xs mt-1">
-                                <span class="px-2 py-1 rounded-full {{ $roleBadgeClass }}">
+                                <span class="badge {{ $roleBadgeClass }}">
+                                    <i class="fas fa-user-tag mr-1"></i>
                                     {{ $roleDisplayName }}
                                 </span>
                             </p>
@@ -559,17 +733,57 @@
     <div class="min-h-screen bg-gray-50 pt-16">
         <!-- Flash Messages -->
         @if(session('success'))
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-                <div class="bg-green-50 border border-green-200 text-green-800 rounded-lg p-4">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <i class="fas fa-check-circle mr-3"></i>
-                            <span>{{ session('success') }}</span>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+                <div class="card bg-green-50 border-green-200">
+                    <div class="card-body">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-600 mr-3"></i>
+                                <span class="text-green-800">{{ session('success') }}</span>
+                            </div>
+                            <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                                    class="text-green-600 hover:text-green-800">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
-                        <button onclick="this.parentElement.parentElement.remove()" 
-                                class="text-green-600 hover:text-green-800">
-                            <i class="fas fa-times"></i>
-                        </button>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+                <div class="card bg-red-50 border-red-200">
+                    <div class="card-body">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-circle text-red-600 mr-3"></i>
+                                <span class="text-red-800">{{ session('error') }}</span>
+                            </div>
+                            <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                                    class="text-red-600 hover:text-red-800">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if(session('warning'))
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+                <div class="card bg-yellow-50 border-yellow-200">
+                    <div class="card-body">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-triangle text-yellow-600 mr-3"></i>
+                                <span class="text-yellow-800">{{ session('warning') }}</span>
+                            </div>
+                            <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                                    class="text-yellow-600 hover:text-yellow-800">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -577,13 +791,16 @@
 
         <!-- Page Header -->
         @if (isset($header))
-            <header class="bg-white shadow-sm">
+            <header class="page-header">
                 <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div class="flex-1">
                             <h1 class="text-xl sm:text-2xl font-bold text-gray-900">
                                 {{ $header }}
                             </h1>
+                            @if (isset($subheader))
+                                <p class="text-sm text-gray-600 mt-1">{{ $subheader }}</p>
+                            @endif
                         </div>
                         @if (isset($action))
                             <div class="flex-shrink-0">
@@ -597,12 +814,68 @@
 
         <!-- Page Content -->
         <main class="flex-1">
-            {{ $slot }}
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                {{ $slot }}
+            </div>
         </main>
     </div>
 
     <!-- Footer -->
-    @include('layouts.footer')
+    <footer class="bg-gray-800 text-white border-t border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="bg-white/10 p-2 rounded-lg">
+                            <i class="fas fa-landmark text-white"></i>
+                        </div>
+                        <span class="font-bold text-lg">
+                            Kelurahan<span class="text-yellow-300">Digital</span>
+                        </span>
+                    </div>
+                    <p class="text-gray-300 text-sm">
+                        Sistem Layanan Kelurahan Digital untuk mempermudah administrasi warga.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Menu Cepat</h4>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li><a href="{{ route('home') }}" class="hover:text-white">Beranda</a></li>
+                        @auth
+                            <li><a href="{{ route($dashboardRoute) }}" class="hover:text-white">Dashboard</a></li>
+                            <li><a href="{{ route('profile.edit') }}" class="hover:text-white">Profil</a></li>
+                        @else
+                            <li><a href="{{ route('login') }}" class="hover:text-white">Masuk</a></li>
+                            <li><a href="{{ route('register') }}" class="hover:text-white">Daftar</a></li>
+                        @endauth
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Kontak</h4>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li class="flex items-center">
+                            <i class="fas fa-map-marker-alt mr-3 text-gray-400"></i>
+                            Jl. Contoh No. 123, Kelurahan Digital
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-phone mr-3 text-gray-400"></i>
+                            (021) 1234-5678
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope mr-3 text-gray-400"></i>
+                            info@kelurahann-digital.com
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
+                <p>&copy; {{ date('Y') }} Kelurahan Digital. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 
     <!-- Alpine.js -->
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
@@ -633,7 +906,37 @@
                     Alpine.$data(nav).mobileMenuOpen = false;
                 }
             });
+            
+            // Add fade-in animation for page content
+            const mainContent = document.querySelector('main');
+            if (mainContent) {
+                mainContent.style.opacity = '0';
+                mainContent.style.transform = 'translateY(10px)';
+                
+                setTimeout(() => {
+                    mainContent.style.transition = 'all 0.5s ease';
+                    mainContent.style.opacity = '1';
+                    mainContent.style.transform = 'translateY(0)';
+                }, 100);
+            }
         });
+        
+        // Helper function for badges
+        function getBadgeClass(status) {
+            const badgeClasses = {
+                'draft': 'badge-draft',
+                'diajukan': 'badge-diajukan',
+                'diproses': 'badge-diproses',
+                'siap_ambil': 'badge-siap_ambil',
+                'selesai': 'badge-selesai',
+                'ditolak': 'badge-ditolak',
+                'menunggu': 'badge-menunggu',
+                'admin': 'badge-admin',
+                'petugas': 'badge-petugas',
+                'warga': 'badge-warga'
+            };
+            return badgeClasses[status] || 'badge-draft';
+        }
     </script>
 </body>
 </html>
