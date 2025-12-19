@@ -74,10 +74,12 @@ Route::get('/storage/{path}', function ($path) {
 
 // ==================== AUTHENTICATED ROUTES ====================
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Main Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // Main Dashboard - HARUS profile lengkap
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard')
+        ->middleware('check.profile.complete');
     
-    // Profile Management
+    // Profile Management - TANPA middleware check.profile.complete
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [ProfileController::class, 'edit'])->name('edit');
         Route::patch('/', [ProfileController::class, 'update'])->name('update');
@@ -88,7 +90,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // ==================== WARGA ROUTES ====================
-Route::middleware(['auth', 'verified', 'role:warga'])->prefix('warga')->name('warga.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:warga', 'check.profile.complete'])
+    ->prefix('warga')
+    ->name('warga.')
+    ->group(function () {
     
     // PENGADUAN ROUTES
     Route::prefix('pengaduan')->name('pengaduan.')->group(function () {
@@ -122,14 +127,17 @@ Route::middleware(['auth', 'verified', 'role:warga'])->prefix('warga')->name('wa
         Route::get('/draft/{jenis_surat}', [SuratController::class, 'createDraft'])->name('draft.create');
         Route::post('/draft/{jenis_surat}', [SuratController::class, 'storeDraft'])->name('draft.store');
         
-        // ✅ TAMBAHKAN ROUTE UNTUK RIWAYAT DAN UPDATE STATUS WARGA
+        // Riwayat dan status
         Route::get('/{surat}/riwayat', [SuratController::class, 'riwayat'])->name('riwayat');
         Route::put('/{surat}/status', [SuratController::class, 'perbaruiStatus'])->name('update.status');
     });
 });
 
 // ==================== PETUGAS ROUTES ====================
-Route::middleware(['auth', 'verified', 'role:petugas'])->prefix('petugas')->name('petugas.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:petugas'])
+    ->prefix('petugas')
+    ->name('petugas.')
+    ->group(function () {
     
     // Dashboard Petugas
     Route::get('/dashboard', [PetugasPengaduanController::class, 'dashboard'])->name('dashboard');
@@ -145,7 +153,7 @@ Route::middleware(['auth', 'verified', 'role:petugas'])->prefix('petugas')->name
         Route::get('/{pengaduan}/riwayat', [PetugasPengaduanController::class, 'riwayat'])->name('riwayat');
     });
 
-    // SURAT PETUGAS - ✅ PERBAIKI BLOK INI
+    // SURAT PETUGAS
     Route::prefix('surat')->name('surat.')->group(function () {
         Route::get('/', [PetugasSuratController::class, 'index'])->name('index');
         Route::get('/{surat}', [PetugasSuratController::class, 'show'])->name('show');
@@ -153,15 +161,10 @@ Route::middleware(['auth', 'verified', 'role:petugas'])->prefix('petugas')->name
         Route::put('/{surat}', [PetugasSuratController::class, 'update'])->name('update');
         Route::put('/{surat}/status', [PetugasSuratController::class, 'updateStatus'])->name('update.status');
         Route::put('/{surat}/proses', [PetugasSuratController::class, 'prosesSurat'])->name('proses');
-        
-        // ✅ TAMBAHKAN ROUTE BARU UNTUK SELESAI DAN TOLAK
         Route::put('/{surat}/selesai', [PetugasSuratController::class, 'selesai'])->name('selesai');
         Route::put('/{surat}/tolak', [PetugasSuratController::class, 'tolak'])->name('tolak');
-        
-        // ✅ TAMBAHKAN ROUTE UNTUK GENERATE
         Route::post('/{surat}/generate', [PetugasSuratController::class, 'generate'])->name('generate');
         Route::post('/{surat}/generate-pdf', [PetugasSuratController::class, 'generatePdf'])->name('generate.pdf');
-        
         Route::get('/{surat}/preview', [PetugasSuratController::class, 'preview'])->name('preview');
         Route::get('/{surat}/riwayat', [PetugasSuratController::class, 'riwayat'])->name('riwayat');
         Route::get('/{surat}/download', [PetugasSuratController::class, 'download'])->name('download');
@@ -169,7 +172,10 @@ Route::middleware(['auth', 'verified', 'role:petugas'])->prefix('petugas')->name
 });
 
 // ==================== ADMIN ROUTES ====================
-Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'verified', 'role:admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
     
     // Admin Dashboard
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
@@ -228,16 +234,11 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
         Route::get('/{surat}/preview', [AdminSuratController::class, 'preview'])->name('preview');
         Route::post('/{surat}/generate-pdf', [AdminSuratController::class, 'generatePdf'])->name('generate.pdf');
         Route::get('/{surat}/riwayat', [AdminSuratController::class, 'riwayat'])->name('riwayat');
-        
-        // Template Management
         Route::get('/{surat}/edit-template', [AdminSuratController::class, 'editTemplate'])->name('edit.template');
         Route::put('/{surat}/update-template', [AdminSuratController::class, 'updateTemplate'])->name('update.template');
-        
-        // ✅ TAMBAHKAN ROUTE DOWNLOAD UNTUK ADMIN
         Route::get('/{surat}/download', [AdminSuratController::class, 'download'])->name('download');
     });
 
-    
     // Kategori Pengaduan
     Route::prefix('kategori-pengaduan')->name('kategori_pengaduan.')->group(function () {
         Route::get('/', [KategoriPengaduanController::class, 'index'])->name('index');

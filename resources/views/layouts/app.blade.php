@@ -304,7 +304,9 @@
         }
         
         /* ===== UTILITIES ===== */
-        [x-cloak] { display: none !important; }
+        [x-cloak] { 
+            display: none !important; 
+        }
         
         .page-header {
             background: white;
@@ -594,6 +596,12 @@
         <!-- Mobile Menu -->
         <div x-show="mobileMenuOpen" 
              x-cloak
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform -translate-y-2"
+             x-transition:enter-end="opacity-100 transform translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 transform translate-y-0"
+             x-transition:leave-end="opacity-0 transform -translate-y-2"
              class="mobile-menu md:hidden shadow-lg">
             
             @auth
@@ -820,10 +828,10 @@
         </main>
     </div>
 
-    <!-- Footer -->
+    <!-- Footer Sederhana untuk App Layout -->
     <footer class="bg-gray-800 text-white border-t border-gray-700">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div>
                     <div class="flex items-center space-x-3 mb-4">
                         <div class="bg-white/10 p-2 rounded-lg">
@@ -857,22 +865,41 @@
                     <ul class="space-y-2 text-sm text-gray-300">
                         <li class="flex items-center">
                             <i class="fas fa-map-marker-alt mr-3 text-gray-400"></i>
-                            Jl. Contoh No. 123, Kelurahan Digital
+                            Wonosobo, Mojotengah
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-phone mr-3 text-gray-400"></i>
-                            (021) 1234-5678
+                            (+62) 813-3315-4367
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-envelope mr-3 text-gray-400"></i>
-                            info@kelurahann-digital.com
+                            larangankulon@gmail.com
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-semibold mb-4">Jam Layanan</h4>
+                    <ul class="space-y-2 text-sm text-gray-300">
+                        <li class="flex justify-between">
+                            <span>Senin - Jumat</span>
+                            <span>08:00 - 16:00</span>
+                        </li>
+                        <li class="flex justify-between">
+                            <span>Sabtu</span>
+                            <span>08:00 - 12:00</span>
+                        </li>
+                        <li class="flex justify-between text-red-300">
+                            <span>Minggu</span>
+                            <span>Tutup</span>
                         </li>
                     </ul>
                 </div>
             </div>
             
             <div class="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
-                <p>&copy; {{ date('Y') }} Kelurahan Digital. All rights reserved.</p>
+                <p>&copy; {{ date('Y') }} Kelurahan Digital. All rights reserved. v2.0.0</p>
+                <p class="mt-1">Developed by Rizz Team</p>
             </div>
         </div>
     </footer>
@@ -885,6 +912,7 @@
     <script>
         // Auto-hide flash messages
         document.addEventListener('DOMContentLoaded', function() {
+            // Auto-hide flash messages setelah 5 detik
             setTimeout(() => {
                 document.querySelectorAll('.bg-green-50, .bg-red-50, .bg-yellow-50, .bg-blue-50').forEach(alert => {
                     alert.style.opacity = '0';

@@ -11,21 +11,25 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    // ✅ Sesuaikan dengan role yang ada di sistem: admin, petugas, warga
+    // ✅ Role constants - konsisten dengan seluruh sistem
     const ROLE_ADMIN = 'admin';
     const ROLE_PETUGAS = 'petugas';
     const ROLE_WARGA = 'warga';
     
-    // Status user
+    // Status user constants
     const STATUS_ACTIVE = 'active';
     const STATUS_INACTIVE = 'inactive';
     const STATUS_SUSPENDED = 'suspended';
+
+    // Login method constants (untuk tracking cara login)
+    const LOGIN_METHOD_GOOGLE = 'google';
+    const LOGIN_METHOD_MANUAL = 'manual';
 
     protected $fillable = [
         'name',
         'email',
         'password',
-        'role', // ✅ Pastikan role ini hanya berisi: admin, petugas, warga
+        'role', // admin, petugas, warga
         'nik',
         'alamat',
         'telepon',
@@ -37,11 +41,14 @@ class User extends Authenticatable
         'google_id',
         'google_token',
         'google_refresh_token',
+        'profile_photo_path', // tambahkan ini jika belum ada
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+        'google_token',
+        'google_refresh_token',
     ];
 
     protected function casts(): array
@@ -51,6 +58,8 @@ class User extends Authenticatable
             'password' => 'hashed',
             'tanggal_lahir' => 'date',
             'is_verified' => 'boolean',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
         ];
     }
 
@@ -61,9 +70,13 @@ class User extends Authenticatable
         'is_admin',
         'is_petugas',
         'is_warga',
+        'profile_completion_percentage',
+        'is_profile_complete',
+        'login_method',
     ];
 
-    // Relationships
+    // ==================== RELATIONSHIPS ====================
+    
     public function pengaduans()
     {
         return $this->hasMany(Pengaduan::class);
@@ -84,19 +97,13 @@ class User extends Authenticatable
         return $this->hasMany(RiwayatSurat::class);
     }
 
-    // Untuk surat yang ditugaskan ke petugas
     public function suratTugas()
     {
         return $this->hasMany(Surat::class, 'petugas_id');
     }
 
-    // ❌ HAPUS suratVerifikasi karena tidak ada role verifikator
-    // public function suratVerifikasi()
-    // {
-    //     return $this->hasMany(Surat::class, 'verifikator_id');
-    // }
-
-    // Scope methods
+    // ==================== SCOPES ====================
+    
     public function scopeWarga($query)
     {
         return $query->where('role', self::ROLE_WARGA);
@@ -112,12 +119,6 @@ class User extends Authenticatable
         return $query->where('role', self::ROLE_ADMIN);
     }
 
-    // ❌ HAPUS scopeVerifikator karena tidak ada role verifikator
-    // public function scopeVerifikator($query)
-    // {
-    //     return $query->where('role', 'verifikator');
-    // }
-
     public function scopeActive($query)
     {
         return $query->where('status', self::STATUS_ACTIVE);
@@ -128,7 +129,29 @@ class User extends Authenticatable
         return $query->where('is_verified', true);
     }
 
-    // Role checking methods - SIMPLIFIED
+    public function scopeGoogleUsers($query)
+    {
+        return $query->whereNotNull('google_id');
+    }
+
+    public function scopeManualUsers($query)
+    {
+        return $query->whereNull('google_id');
+    }
+
+    public function scopeWithIncompleteProfile($query)
+    {
+        return $query->where(function($q) {
+            $q->whereNull('nik')
+              ->orWhereNull('telepon')
+              ->orWhereNull('alamat')
+              ->orWhereNull('tanggal_lahir')
+              ->orWhereNull('jenis_kelamin');
+        })->where('role', self::ROLE_WARGA);
+    }
+
+    // ==================== ROLE CHECKING METHODS ====================
+    
     public function hasRole($role): bool
     {
         if (is_array($role)) {
@@ -143,7 +166,6 @@ class User extends Authenticatable
         return in_array($this->role, $roles);
     }
 
-    // Helper methods - Lebih sederhana
     public function isWarga(): bool
     {
         return $this->role === self::ROLE_WARGA;
@@ -159,28 +181,20 @@ class User extends Authenticatable
         return $this->role === self::ROLE_ADMIN;
     }
 
-    // ❌ HAPUS karena tidak ada role verifikator
-    // public function isVerifikator(): bool
-    // {
-    //     return $this->role === 'verifikator';
-    // }
-
-    // Method untuk memeriksa kemampuan user
+    // ==================== CAPABILITY METHODS ====================
+    
     public function dapatMemverifikasi(): bool
     {
-        // Hanya admin yang bisa memverifikasi
         return $this->isAdmin();
     }
 
     public function dapatMemprosesSurat(): bool
     {
-        // Admin dan petugas bisa memproses surat
         return $this->isAdmin() || $this->isPetugas();
     }
 
     public function dapatMemprosesPengaduan(): bool
     {
-        // Admin dan petugas bisa memproses pengaduan
         return $this->isAdmin() || $this->isPetugas();
     }
 
@@ -194,72 +208,147 @@ class User extends Authenticatable
         return $this->is_verified === true;
     }
 
-    // ❌ OPSIONAL: HAPUS permission system jika tidak diperlukan
-    // Karena Anda pakai role middleware sederhana
-    /*
-    public function hasPermissionTo($permission): bool
+    public function isGoogleUser(): bool
     {
-        // Jika ingin tetap pakai permission, sesuaikan dengan role yang ada
-        $permissions = $this->getPermissions();
-        return in_array($permission, $permissions);
+        return !empty($this->google_id);
     }
 
-    public function getPermissions(): array
+    // ==================== PROFILE COMPLETION METHODS ====================
+    
+    /**
+     * Check if user profile is complete
+     */
+    public function isProfileComplete(): bool
     {
-        // Sesuaikan dengan role yang ada
-        $rolePermissions = [
-            self::ROLE_ADMIN => [
-                'manage-users',
-                'manage-pengaduan', 
-                'manage-surat',
-                'manage-master-data',
-                'view-reports',
-                'export-data',
-                'verify-surat',
-                'assign-petugas',
-                'process-surat',
-                'generate-pdf'
-            ],
-            self::ROLE_PETUGAS => [
-                'manage-pengaduan',
-                'manage-surat',
-                'process-surat',
-                'generate-pdf',
-                'view-reports'
-            ],
-            self::ROLE_WARGA => [
-                'create-pengaduan',
-                'create-surat',
-                'view-own-data',
-                'track-status'
-            ]
+        // Jika bukan warga, dianggap lengkap
+        if (!$this->isWarga()) {
+            return true;
+        }
+
+        // Field wajib untuk warga
+        $requiredFields = ['nik', 'telepon', 'alamat', 'tanggal_lahir', 'jenis_kelamin'];
+        
+        foreach ($requiredFields as $field) {
+            if (empty($this->{$field})) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Get missing profile fields
+     */
+    public function getMissingProfileFields(): array
+    {
+        if (!$this->isWarga()) {
+            return [];
+        }
+
+        $missing = [];
+        $fields = [
+            'nik' => 'NIK',
+            'telepon' => 'Nomor Telepon',
+            'alamat' => 'Alamat',
+            'tanggal_lahir' => 'Tanggal Lahir',
+            'jenis_kelamin' => 'Jenis Kelamin',
+            'foto_ktp' => 'Foto KTP'
         ];
 
-        return $rolePermissions[$this->role] ?? [];
+        foreach ($fields as $field => $label) {
+            if (empty($this->{$field})) {
+                $missing[] = $label;
+            }
+        }
+
+        return $missing;
     }
 
-    public function getAllPermissions()
+    /**
+     * Calculate profile completion percentage
+     */
+    public function getProfileCompletionPercentage(): int
     {
-        return collect($this->getPermissions());
-    }
-    */
+        if (!$this->isWarga()) {
+            return 100;
+        }
 
+        $fields = ['nik', 'telepon', 'alamat', 'tanggal_lahir', 'jenis_kelamin'];
+        $filled = 0;
+        
+        foreach ($fields as $field) {
+            if (!empty($this->{$field})) {
+                $filled++;
+            }
+        }
+
+        return $filled === 0 ? 0 : round(($filled / count($fields)) * 100);
+    }
+
+    // ==================== HELPER METHODS ====================
+    
     public function getRoleNames()
     {
         return collect([$this->role]);
     }
 
-    // Attribute accessors
+    public function getSuratDapatDiproses()
+    {
+        if ($this->dapatMemprosesSurat()) {
+            return Surat::whereIn('status', ['diajukan', 'diproses'])
+                ->when($this->isPetugas(), function ($query) {
+                    return $query->where(function($q) {
+                        $q->where('petugas_id', $this->id)
+                          ->orWhereNull('petugas_id');
+                    });
+                })
+                ->get();
+        }
+        
+        return collect();
+    }
+
+    public function getSuratDapatDiverifikasi()
+    {
+        if ($this->dapatMemverifikasi()) {
+            return Surat::where('status', 'diajukan')
+                ->get();
+        }
+        
+        return collect();
+    }
+    
+    public function getPengaduanDapatDiproses()
+    {
+        if ($this->dapatMemprosesPengaduan()) {
+            return Pengaduan::whereIn('status', ['diterima', 'diproses'])
+                ->when($this->isPetugas(), function ($query) {
+                    return $query->where(function($q) {
+                        $q->where('petugas_id', $this->id)
+                          ->orWhereNull('petugas_id');
+                    });
+                })
+                ->get();
+        }
+        
+        return collect();
+    }
+
+    // ==================== ATTRIBUTE ACCESSORS ====================
+    
     public function getInitialsAttribute(): string
     {
         $names = explode(' ', $this->name);
         $initials = '';
         
         foreach ($names as $name) {
-            $initials .= strtoupper(substr($name, 0, 1));
+            if (!empty($name)) {
+                $initials .= strtoupper(substr($name, 0, 1));
+            }
         }
         
-        return substr($initials, 0, 2);
+        return substr($initials, 0, 2) ?: '??';
     }
 
     public function getRoleDisplayAttribute(): string
@@ -284,7 +373,6 @@ class User extends Authenticatable
         return $statuses[$this->status] ?? ucfirst($this->status);
     }
 
-    // Helper attributes untuk template Blade
     public function getIsAdminAttribute(): bool
     {
         return $this->isAdmin();
@@ -300,48 +388,133 @@ class User extends Authenticatable
         return $this->isWarga();
     }
 
-    // Method untuk mendapatkan tugas
-    public function getSuratDapatDiproses()
+    public function getProfileCompletionPercentageAttribute(): int
     {
-        if ($this->dapatMemprosesSurat()) {
-            return Surat::whereIn('status', ['diajukan', 'diproses'])
-                ->when($this->isPetugas(), function ($query) {
-                    // Petugas hanya melihat yang ditugaskan ke mereka atau belum ada petugas
-                    return $query->where(function($q) {
-                        $q->where('petugas_id', $this->id)
-                          ->orWhereNull('petugas_id');
-                    });
-                })
-                ->get();
-        }
-        
-        return collect();
+        return $this->getProfileCompletionPercentage();
     }
 
-    public function getSuratDapatDiverifikasi()
+    public function getIsProfileCompleteAttribute(): bool
     {
-        if ($this->dapatMemverifikasi()) {
-            return Surat::where('status', 'diajukan')
-                ->get();
-        }
-        
-        return collect();
+        return $this->isProfileComplete();
     }
-    
-    // Method untuk mendapatkan pengaduan yang dapat diproses
-    public function getPengaduanDapatDiproses()
+
+    public function getLoginMethodAttribute(): string
     {
-        if ($this->dapatMemprosesPengaduan()) {
-            return Pengaduan::whereIn('status', ['diterima', 'diproses'])
-                ->when($this->isPetugas(), function ($query) {
-                    return $query->where(function($q) {
-                        $q->where('petugas_id', $this->id)
-                          ->orWhereNull('petugas_id');
-                    });
-                })
-                ->get();
+        return $this->isGoogleUser() ? self::LOGIN_METHOD_GOOGLE : self::LOGIN_METHOD_MANUAL;
+    }
+
+    public function getProfilePhotoUrlAttribute(): ?string
+    {
+        if ($this->profile_photo_path) {
+            return asset('storage/' . $this->profile_photo_path);
         }
         
-        return collect();
+        // Fallback ke Gravatar atau default avatar
+        $hash = md5(strtolower(trim($this->email)));
+        return "https://www.gravatar.com/avatar/{$hash}?d=mp&s=200";
+    }
+
+    public function getKtpUrlAttribute(): ?string
+    {
+        if ($this->foto_ktp) {
+            return asset('storage/' . $this->foto_ktp);
+        }
+        
+        return null;
+    }
+
+    // ==================== BUSINESS LOGIC ====================
+    
+    /**
+     * Complete user profile and auto-verify if applicable
+     */
+    public function completeProfile(): bool
+    {
+        if ($this->isProfileComplete() && !$this->is_verified && $this->isWarga()) {
+            $this->update(['is_verified' => true]);
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Mark user as Google user
+     */
+    public function markAsGoogleUser(string $googleId, string $token, ?string $refreshToken = null): void
+    {
+        $this->update([
+            'google_id' => $googleId,
+            'google_token' => $token,
+            'google_refresh_token' => $refreshToken,
+            'email_verified_at' => $this->email_verified_at ?? now(),
+        ]);
+    }
+
+    /**
+     * Check if user can access specific feature based on profile completion
+     */
+    public function canAccessFeature(string $feature): bool
+    {
+        // Jika bukan warga, selalu bisa akses
+        if (!$this->isWarga()) {
+            return true;
+        }
+
+        // Jika profile belum lengkap, hanya bisa akses feature tertentu
+        if (!$this->isProfileComplete()) {
+            $allowedFeatures = ['dashboard', 'profile.edit', 'profile.update', 'logout'];
+            return in_array($feature, $allowedFeatures);
+        }
+
+        return true;
+    }
+
+    /**
+     * Get user's dashboard route based on role
+     */
+    public function getDashboardRoute(): string
+    {
+        return match($this->role) {
+            self::ROLE_ADMIN => 'admin.dashboard',
+            self::ROLE_PETUGAS => 'petugas.dashboard',
+            default => 'dashboard',
+        };
+    }
+
+    /**
+     * Format tanggal lahir untuk display
+     */
+    public function getTanggalLahirFormattedAttribute(): string
+    {
+        if (!$this->tanggal_lahir) {
+            return '-';
+        }
+
+        return $this->tanggal_lahir->translatedFormat('d F Y');
+    }
+
+    /**
+     * Calculate age from tanggal lahir
+     */
+    public function getAgeAttribute(): ?int
+    {
+        if (!$this->tanggal_lahir) {
+            return null;
+        }
+
+        return $this->tanggal_lahir->age;
+    }
+
+    /**
+     * Check if user is 17+ years old
+     */
+    public function isAdult(): bool
+    {
+        if (!$this->tanggal_lahir) {
+            return false;
+        }
+
+        return $this->tanggal_lahir->age >= 17;
     }
 }

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" 
-      x-data="modalState()"
+      x-data="welcomeModalState()"
       x-on:keydown.escape.window="closeModal()"
       :class="{ 'overflow-hidden': modalOpen }">
     <head>
@@ -61,13 +61,21 @@
                 font-variant-numeric: tabular-nums;
             }
             
-            /* Modal z-index untuk welcome page */
+            /* Modal Styling */
             .modal-overlay {
-                z-index: 9997 !important;
+                z-index: 9999 !important;
+                background: rgba(0, 0, 0, 0.5);
+                backdrop-filter: blur(4px);
             }
             
             /* Pastikan modal tampil di atas semua konten */
-            [x-cloak] { display: none !important; }
+            [x-cloak] { 
+                display: none !important; 
+            }
+            
+            body.modal-open {
+                overflow: hidden !important;
+            }
         </style>
     </head>
     <body class="font-poppins antialiased">
@@ -280,9 +288,10 @@
                                 Akses sekarang
                             </li>
                         </ul>
-                        <a href="{{ route('login') }}" class="inline-flex items-center text-purple-600 font-semibold hover:text-purple-800">
+                        <a href="{{ route('login') }}" class="inline-flex items-center text-green-600 font-semibold hover:text-green-800">
                             Lacak Sekarang <i class="fas fa-arrow-right ml-2"></i>
                         </a>
+                    </div>
                 </div>
             </div>
         </section>
@@ -346,27 +355,38 @@
             </div>
         </section>
 
-        <!-- Footer dengan modal -->
-        @include('layouts.footer')
+        <!-- Include Footer dengan Modals -->
+        @include('partials.footer-with-modals')
 
-        <!-- JavaScript Clean -->
+        <!-- JavaScript untuk Welcome Page -->
+        <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+        
         <script>
-            // Alpine.js Modal State
-            function modalState() {
+            // Alpine.js Modal State khusus untuk welcome page
+            function welcomeModalState() {
                 return {
                     modalOpen: false,
                     activeModal: null,
                     
+                    init() {
+                        // Event listener untuk close modal dengan escape key
+                        window.addEventListener('keydown', (e) => {
+                            if (e.key === 'Escape' && this.modalOpen) {
+                                this.closeModal();
+                            }
+                        });
+                    },
+                    
                     showModal(modalId) {
                         this.activeModal = modalId;
                         this.modalOpen = true;
-                        document.body.style.overflow = 'hidden';
+                        document.body.classList.add('modal-open');
                     },
                     
                     closeModal() {
                         this.activeModal = null;
                         this.modalOpen = false;
-                        document.body.style.overflow = 'auto';
+                        document.body.classList.remove('modal-open');
                     }
                 }
             }
@@ -382,10 +402,13 @@
                     this.initSmoothScroll();
                     this.initNavbarScroll();
                     this.initBackToTop();
+                    this.initModalCloseOnClickOutside();
                 }
 
                 initCounters() {
                     const counters = document.querySelectorAll('.stats-counter');
+                    if (!counters.length) return;
+
                     const observer = new IntersectionObserver((entries) => {
                         entries.forEach(entry => {
                             if (entry.isIntersecting) {
@@ -400,6 +423,8 @@
 
                 animateCounter(element) {
                     const target = parseInt(element.getAttribute('data-count'));
+                    if (isNaN(target)) return;
+
                     const increment = target / 50;
                     let current = 0;
 
@@ -418,7 +443,7 @@
                     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                         anchor.addEventListener('click', (e) => {
                             const href = anchor.getAttribute('href');
-                            if (href === '#') return;
+                            if (href === '#' || href === '#!') return;
                             
                             e.preventDefault();
                             const target = document.querySelector(href);
@@ -434,10 +459,16 @@
 
                 initNavbarScroll() {
                     const nav = document.querySelector('nav');
+                    if (!nav) return;
+
                     window.addEventListener('scroll', () => {
-                        nav.classList.toggle('bg-white', window.scrollY > 50);
-                        nav.classList.toggle('shadow-lg', window.scrollY > 50);
-                        nav.classList.toggle('bg-white/90', window.scrollY <= 50);
+                        if (window.scrollY > 50) {
+                            nav.classList.add('bg-white', 'shadow-lg');
+                            nav.classList.remove('bg-white/90');
+                        } else {
+                            nav.classList.remove('bg-white', 'shadow-lg');
+                            nav.classList.add('bg-white/90');
+                        }
                     });
                 }
 
@@ -450,14 +481,32 @@
                     document.body.appendChild(button);
 
                     window.addEventListener('scroll', () => {
-                        button.classList.toggle('opacity-0', window.scrollY <= 300);
-                        button.classList.toggle('invisible', window.scrollY <= 300);
-                        button.classList.toggle('opacity-100', window.scrollY > 300);
-                        button.classList.toggle('visible', window.scrollY > 300);
+                        if (window.scrollY > 300) {
+                            button.classList.remove('opacity-0', 'invisible');
+                            button.classList.add('opacity-100', 'visible');
+                        } else {
+                            button.classList.remove('opacity-100', 'visible');
+                            button.classList.add('opacity-0', 'invisible');
+                        }
                     });
 
                     button.addEventListener('click', () => {
                         window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                }
+
+                initModalCloseOnClickOutside() {
+                    // Close modal ketika klik di luar modal content
+                    document.addEventListener('click', (e) => {
+                        const modal = document.querySelector('[x-show="modalOpen"] .modal-content');
+                        const overlay = document.querySelector('.modal-overlay');
+                        
+                        if (modal && overlay && !modal.contains(e.target) && overlay.contains(e.target)) {
+                            const alpineData = Alpine.$data(document.querySelector('[x-data]'));
+                            if (alpineData && alpineData.closeModal) {
+                                alpineData.closeModal();
+                            }
+                        }
                     });
                 }
             }

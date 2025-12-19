@@ -129,13 +129,13 @@
                 <div class="flex justify-between items-center h-16 md:h-20">
                     <!-- Logo -->
                     <div class="flex items-center space-x-3">
-                        <a href="{{ url('/') }}" class="flex items-center space-x-3">
-                            <div class="bg-gradient-to-br from-blue-600 to-purple-600 p-2 rounded-xl">
-                                <i class="fas fa-landmark text-white text-2xl"></i>
+                        <a href="{{ url('/') }}" class="flex items-center space-x-3 no-underline">
+                            <div class="bg-gradient-to-br from-blue-600 to-purple-600 p-2 md:p-3 rounded-xl shadow-sm">
+                                <i class="fas fa-landmark text-white text-xl md:text-2xl"></i>
                             </div>
                             <div>
-                                <h1 class="text-xl font-bold text-gray-900">Kelurahan<span class="text-yellow-300">Digital</span></h1>
-                                <p class="text-xs text-gray-500">Sistem Layanan Terpadu</p>
+                                <h1 class="text-lg md:text-xl font-bold text-gray-900">Kelurahan<span class="text-yellow-300">Digital</span></h1>
+                                <p class="text-xs text-gray-500 hidden md:block">Sistem Layanan Terpadu</p>
                             </div>
                         </a>
                     </div>
@@ -198,7 +198,8 @@
                                 </div>
                                 
                                 <h2 class="text-2xl md:text-3xl font-bold mb-6 leading-tight">
-                                    Selamat Datang Kembali di Kelurahan<span class="text-yellow-300">Digital</span>
+                                    Selamat Datang Kembali di
+                                    <span class="text-white-900">Kelurahan<span class="text-yellow-300">Digital</span>
                                 </h2>
                                 
                                 <p class="text-base md:text-lg text-blue-100 mb-8 leading-relaxed">
@@ -432,7 +433,8 @@
             </div>
         </main>
 
-        @include('layouts.footer')
+        <!-- Footer -->
+        @include('partials.footer-with-modals')
 
         <!-- JavaScript -->
         <script>
